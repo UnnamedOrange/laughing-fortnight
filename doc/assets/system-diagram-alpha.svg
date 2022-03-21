@@ -1,0 +1,586 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="3593.8955"
+   height="1907.0834"
+   overflow="hidden"
+   version="1.1"
+   id="svg183"
+   sodipodi:docname="system-diagram.svg"
+   inkscape:version="1.1.2 (b8e25be833, 2022-02-05)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview185"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     showgrid="false"
+     inkscape:zoom="0.32792743"
+     inkscape:cx="1802.228"
+     inkscape:cy="968.20201"
+     inkscape:window-width="1920"
+     inkscape:window-height="991"
+     inkscape:window-x="-9"
+     inkscape:window-y="-9"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg183" />
+  <defs
+     id="defs41">
+    <clipPath
+       id="clip0">
+      <rect
+         x="397"
+         y="284"
+         width="3638"
+         height="1937"
+         id="rect2" />
+    </clipPath>
+    <clipPath
+       id="clip1">
+      <rect
+         x="397"
+         y="810"
+         width="331"
+         height="331"
+         id="rect5" />
+    </clipPath>
+    <clipPath
+       id="clip2">
+      <rect
+         x="397"
+         y="810"
+         width="331"
+         height="331"
+         id="rect8" />
+    </clipPath>
+    <clipPath
+       id="clip3">
+      <rect
+         x="397"
+         y="810"
+         width="331"
+         height="331"
+         id="rect11" />
+    </clipPath>
+    <clipPath
+       id="clip4">
+      <rect
+         x="397"
+         y="288"
+         width="331"
+         height="331"
+         id="rect14" />
+    </clipPath>
+    <clipPath
+       id="clip5">
+      <rect
+         x="397"
+         y="288"
+         width="331"
+         height="331"
+         id="rect17" />
+    </clipPath>
+    <clipPath
+       id="clip6">
+      <rect
+         x="397"
+         y="288"
+         width="331"
+         height="331"
+         id="rect20" />
+    </clipPath>
+    <clipPath
+       id="clip7">
+      <rect
+         x="397"
+         y="1333"
+         width="331"
+         height="331"
+         id="rect23" />
+    </clipPath>
+    <clipPath
+       id="clip8">
+      <rect
+         x="397"
+         y="1333"
+         width="331"
+         height="331"
+         id="rect26" />
+    </clipPath>
+    <clipPath
+       id="clip9">
+      <rect
+         x="397"
+         y="1333"
+         width="331"
+         height="331"
+         id="rect29" />
+    </clipPath>
+    <clipPath
+       id="clip10">
+      <rect
+         x="397"
+         y="1856"
+         width="331"
+         height="331"
+         id="rect32" />
+    </clipPath>
+    <clipPath
+       id="clip11">
+      <rect
+         x="397"
+         y="1856"
+         width="331"
+         height="331"
+         id="rect35" />
+    </clipPath>
+    <clipPath
+       id="clip12">
+      <rect
+         x="397"
+         y="1856"
+         width="331"
+         height="331"
+         id="rect38" />
+    </clipPath>
+  </defs>
+  <g
+     clip-path="url(#clip0)"
+     transform="translate(-414.18795,-284)"
+     id="g181">
+    <rect
+       x="2114.5"
+       y="1064.5"
+       width="367"
+       height="367"
+       stroke="#000000"
+       stroke-width="9.16667"
+       stroke-miterlimit="8"
+       fill="none"
+       id="rect43" />
+    <text
+       font-family="DengXian, DengXian_MSFontService, sans-serif"
+       font-weight="400"
+       font-size="110px"
+       transform="translate(2179.19,1285)"
+       id="text45">MCU</text>
+    <rect
+       x="1182.5"
+       y="288.5"
+       width="431"
+       height="327"
+       stroke="#000000"
+       stroke-width="9.16667"
+       stroke-miterlimit="8"
+       fill="none"
+       id="rect47" />
+    <text
+       font-family="DengXian, DengXian_MSFontService, sans-serif"
+       font-weight="400"
+       font-size="110px"
+       transform="translate(1225.91,422)"
+       id="text55">NB<tspan
+   font-size="110px"
+   x="141.50999"
+   y="0"
+   id="tspan49">-</tspan><tspan
+   font-size="110px"
+   x="196.50999"
+   y="0"
+   id="tspan51">IoT</tspan><tspan
+   font-size="110px"
+   x="61.577"
+   y="132"
+   id="tspan53">模块</tspan></text>
+    <rect
+       x="1032.5"
+       y="811.5"
+       width="731"
+       height="328"
+       stroke="#000000"
+       stroke-width="9.16667"
+       stroke-miterlimit="8"
+       fill="none"
+       id="rect57" />
+    <text
+       font-family="DengXian, DengXian_MSFontService, sans-serif"
+       font-weight="400"
+       font-size="110px"
+       transform="translate(1154.86,946)"
+       id="text63">北斗<tspan
+   font-size="110px"
+   x="220"
+   y="0"
+   id="tspan59">+GPS</tspan><tspan
+   font-size="110px"
+   x="-87.358299"
+   y="132"
+   id="tspan61">双模定位模块</tspan></text>
+    <rect
+       x="1182.5"
+       y="1335.5"
+       width="431"
+       height="328"
+       stroke="#000000"
+       stroke-width="9.16667"
+       stroke-miterlimit="8"
+       stroke-dasharray="36.6667, 27.5"
+       fill="none"
+       id="rect65" />
+    <text
+       font-family="DengXian, DengXian_MSFontService, sans-serif"
+       font-weight="400"
+       font-size="110px"
+       transform="translate(1287.5,1470)"
+       id="text69">蓝牙<tspan
+   font-size="110px"
+   x="0"
+   y="132"
+   id="tspan67">模块</tspan></text>
+    <rect
+       x="2833.5"
+       y="561.5"
+       width="507"
+       height="328"
+       stroke="#000000"
+       stroke-width="9.16667"
+       stroke-miterlimit="8"
+       fill="none"
+       id="rect71" />
+    <text
+       font-family="DengXian, DengXian_MSFontService, sans-serif"
+       font-weight="400"
+       font-size="110px"
+       transform="translate(2976.25,696)"
+       id="text75">电源<tspan
+   font-size="110px"
+   x="-110"
+   y="132"
+   id="tspan73">管理模块</tspan></text>
+    <rect
+       x="2833.5"
+       y="1084.5"
+       width="507"
+       height="327"
+       stroke="#000000"
+       stroke-width="9.16667"
+       stroke-miterlimit="8"
+       fill="none"
+       id="rect77" />
+    <text
+       font-family="DengXian, DengXian_MSFontService, sans-serif"
+       font-weight="400"
+       font-size="110px"
+       transform="translate(2976.25,1219)"
+       id="text81">三轴<tspan
+   font-size="110px"
+   x="-110"
+   y="132"
+   id="tspan79">加速度计</tspan></text>
+    <rect
+       x="1182.5"
+       y="1859.5"
+       width="431"
+       height="327"
+       stroke="#000000"
+       stroke-width="9.16667"
+       stroke-miterlimit="8"
+       stroke-dasharray="36.6667, 27.5"
+       fill="none"
+       id="rect83" />
+    <text
+       font-family="DengXian, DengXian_MSFontService, sans-serif"
+       font-weight="400"
+       font-size="110px"
+       transform="translate(1257.42,1994)"
+       id="text87">ANT+<tspan
+   font-size="110px"
+   x="30.0667"
+   y="132"
+   id="tspan85">模块</tspan></text>
+    <rect
+       x="2871.5"
+       y="1609.5"
+       width="430"
+       height="327"
+       stroke="#000000"
+       stroke-width="9.16667"
+       stroke-miterlimit="8"
+       stroke-dasharray="36.6667, 27.5"
+       fill="none"
+       id="rect89" />
+    <text
+       font-family="DengXian, DengXian_MSFontService, sans-serif"
+       font-weight="400"
+       font-size="110px"
+       transform="translate(2995.16,1810)"
+       id="text91">LED</text>
+    <path
+       d="m 1613.5,451.5 501.25,796.25"
+       stroke="#000000"
+       stroke-width="9.16667"
+       stroke-miterlimit="8"
+       fill="none"
+       fill-rule="evenodd"
+       id="path93" />
+    <path
+       d="M 1763.5,975.5 2114.75,1248"
+       stroke="#000000"
+       stroke-width="9.16667"
+       stroke-miterlimit="8"
+       fill="none"
+       fill-rule="evenodd"
+       id="path95" />
+    <path
+       d="M 0,0 501.25,251.25"
+       stroke="#000000"
+       stroke-width="9.16667"
+       stroke-miterlimit="8"
+       fill="none"
+       fill-rule="evenodd"
+       transform="matrix(1,0,0,-1,1613.5,1499.75)"
+       id="path97" />
+    <path
+       d="M 0,0 501.25,774.999"
+       stroke="#000000"
+       stroke-width="9.16667"
+       stroke-miterlimit="8"
+       fill="none"
+       fill-rule="evenodd"
+       transform="matrix(1,0,0,-1,1613.5,2023.5)"
+       id="path99" />
+    <path
+       d="M 0,0 351.25,522.499"
+       stroke="#000000"
+       stroke-width="9.16667"
+       stroke-miterlimit="8"
+       fill="none"
+       fill-rule="evenodd"
+       transform="matrix(1,0,0,-1,2481.5,1248)"
+       id="path101" />
+    <path
+       d="m 2481.5,1248.5 h 351.25"
+       stroke="#000000"
+       stroke-width="9.16667"
+       stroke-miterlimit="8"
+       fill="none"
+       fill-rule="evenodd"
+       id="path103" />
+    <path
+       d="m 2481.5,1248.5 390,525"
+       stroke="#000000"
+       stroke-width="9.16667"
+       stroke-miterlimit="8"
+       fill="none"
+       fill-rule="evenodd"
+       id="path105" />
+    <g
+       clip-path="url(#clip1)"
+       id="g113">
+      <g
+         clip-path="url(#clip2)"
+         id="g111">
+        <g
+           clip-path="url(#clip3)"
+           id="g109">
+          <path
+             d="m 703.625,1017.94 -43.656,-43.659 c -5.5,-5.5 -14.094,-5.5 -19.594,0 l -26.813,26.809 -12.031,-12.028 36.438,-36.437 c 5.5,-5.5 5.5,-14.094 0,-19.594 0,0 0,0 0,0 l -5.844,-5.844 14.437,-4.812 -31.624,-32.313 -4.813,14.438 -5.844,-5.844 c -5.5,-5.5 -14.093,-5.5 -19.593,0 0,0 0,0 0,0 l -36.438,36.781 -12.031,-12.031 26.812,-26.812 c 5.5,-5.5 5.5,-14.094 0,-19.594 l -44,-43.656 c -5.5,-5.5 -14.093,-5.5 -19.593,0 l -60.5,60.5 c -5.5,5.5 -5.5,14.093 0,19.593 0,0 0,0 0,0 l 43.656,43.657 c 5.5,5.5 14.094,5.5 19.594,0 l 28.874,-29.219 12.032,12.031 L 507,976.687 c -5.5,5.5 -5.5,14.094 0,19.594 0,0 0,0 0,0 l 9.625,9.629 -9.969,9.96 c -9.625,-8.25 -20.968,-13.75 -33.343,-16.151 -12.375,-2.063 -23.375,0 -29.563,6.191 l -2.406,2.4 13.406,13.75 v 48.13 c -0.344,0 -1.031,0 -1.375,0 -7.562,0 -13.75,6.18 -13.75,13.75 0,7.56 6.188,13.75 13.75,13.75 7.563,0 13.75,-6.19 13.75,-13.75 0,-0.35 0,-1.03 0,-1.38 h 48.125 l 13.75,13.41 2.406,-2.41 c 9.969,-9.97 11,-36.78 -9.968,-62.9 l 9.968,-9.97 9.625,9.62 c 5.5,5.5 14.094,5.5 19.594,0 l 36.437,-36.435 12.032,12.035 -29.219,29.21 c -5.5,5.5 -5.5,14.1 0,19.6 l 43.656,43.65 c 5.5,5.5 14.094,5.5 19.594,0 l 60.844,-60.84 c 5.156,-5.5 5.156,-14.09 -0.344,-19.59 z m -85.937,-115.159 16.5,16.5 -7.219,2.406 L 615.281,910 Z m -59.813,-11.344 -26.813,26.813 -14.437,-14.438 31.625,-31.625 9.625,9.625 c 2.75,2.75 2.75,7.219 0,9.625 0,0 0,0 0,0 z m -60.844,-7.218 31.625,-31.625 14.438,14.437 -31.625,31.625 z m 9.969,19.593 -34.031,34.032 -14.438,-14.438 34.032,-34.031 z m -2.406,-65.656 c 2.75,-2.75 6.875,-2.75 9.625,0 l 9.625,9.625 -31.625,31.625 -14.438,-14.437 z m -62.906,65.656 c 0,-1.718 0.687,-3.437 2.062,-4.812 l 29.219,-29.219 14.437,14.438 -34.031,34.031 -9.625,-9.625 c -1.375,-1.375 -2.062,-3.094 -2.062,-4.813 z m 55.343,48.469 c -2.75,2.75 -6.875,2.75 -9.625,0 l -9.625,-9.625 34.032,-34.031 14.437,14.437 z m -14.437,97.279 -20.969,20.97 v -41.94 z m -24.406,38.85 c -2.75,2.75 -6.875,2.75 -9.625,0 -2.75,-2.75 -2.75,-6.88 0,-9.63 2.75,-2.75 6.875,-2.75 9.625,0 2.75,2.75 2.75,6.88 0,9.63 0,0 0,0 0,0 z m 8.25,-13.07 20.968,-20.97 20.969,20.97 z m 61.874,10.32 -76.999,-77 c 6.531,-3.1 13.75,-3.79 20.625,-2.07 8.937,1.72 22.687,6.53 37.468,21.32 23.375,23.03 24.75,47.43 18.906,57.75 z m -11.687,-60.16 c -0.687,-0.69 -1.375,-1.72 -2.406,-2.41 -1.031,-0.68 -1.719,-1.72 -2.406,-2.4 l 9.625,-9.63 4.812,4.81 z m 38.844,-0.34 c -2.75,2.75 -6.875,2.75 -9.625,0 l -9.625,-9.63 v 0 l -5.157,-4.81 v 0 l -4.812,-4.81 -4.812,-4.82 -9.625,-9.621 c -2.75,-2.75 -2.75,-6.875 0,-9.625 0,0 0,0 0,0 L 589.5,903.812 c 2.75,-2.75 6.875,-2.75 9.625,0 0,0 0,0 0,0 l 8.25,8.25 v 0 l 17.531,17.532 8.25,8.25 c 2.75,2.75 2.75,6.875 0,9.625 0,0 0,0 0,0 z m 82.843,0 31.626,-31.629 14.437,14.439 -31.625,31.62 z m 9.626,19.59 -34.032,34.03 -14.437,-14.44 34.031,-34.03 z m -2.407,-65.656 c 2.75,-2.75 6.875,-2.75 9.625,0 0,0 0,0 0,0 l 9.625,9.625 -31.625,31.621 -14.437,-14.43 z m -60.843,60.846 29.218,-29.22 14.438,14.44 -34.032,34.03 -9.624,-9.63 c -2.75,-2.75 -2.75,-6.87 0,-9.62 z m 53.624,53.28 c -2.75,2.75 -6.874,2.75 -9.624,0 l -9.626,-9.63 34.032,-34.03 14.437,14.44 z m 34.032,-34.03 -14.782,-14.44 31.626,-31.63 9.624,9.63 c 2.75,2.75 2.75,6.87 0,9.62 z"
+             id="path107" />
+        </g>
+      </g>
+    </g>
+    <g
+       clip-path="url(#clip4)"
+       id="g121">
+      <g
+         clip-path="url(#clip5)"
+         id="g119">
+        <g
+           clip-path="url(#clip6)"
+           id="g117">
+          <path
+             d="m 647.903,487.303 h 0.035 V 359.627 c 7.341,-1.881 11.767,-9.358 9.886,-16.699 -1.881,-7.342 -9.358,-11.768 -16.699,-9.887 -4.853,1.244 -8.643,5.034 -9.887,9.887 H 503.563 l -20.625,-20.625 c -20.312,37.099 -22.368,81.495 -5.573,120.312 6.02,13.663 14.363,26.178 24.658,36.991 l -44,94.25 c -1.599,3.444 -0.103,7.532 3.341,9.13 0.911,0.423 1.903,0.641 2.908,0.639 h 85.456 c 3.797,0 6.875,-3.079 6.874,-6.876 0,-1.004 -0.22,-1.997 -0.645,-2.907 l -36.503,-78.217 c 9.543,7.788 20.147,14.177 31.491,18.975 16.679,6.969 34.572,10.567 52.649,10.588 0.594,0 1.189,0 1.784,0 22.317,-0.231 44.241,-5.9 63.872,-16.518 z M 578.156,417.556 637.56,358.17 c 1.093,0.647 2.273,1.138 3.502,1.457 V 480.462 Z M 644.5,339.49 c 3.797,0 6.875,3.078 6.875,6.875 0,3.797 -3.078,6.875 -6.875,6.875 -3.797,0 -6.875,-3.078 -6.875,-6.875 0,-3.797 3.078,-6.875 6.875,-6.875 z m -13.262,10.313 c 0.319,1.233 0.811,2.415 1.461,3.51 l -59.39,59.382 -62.871,-62.892 z M 523.644,520.867 507,537.514 490.352,520.867 506.969,485.258 c 0.008,-0.018 0.029,-0.025 0.046,-0.016 0.007,0.003 0.013,0.009 0.016,0.016 z m -36.386,6.627 14.881,14.881 -34.375,34.375 h -3.437 c -0.017,10e-4 -0.032,-0.012 -0.033,-0.029 0,-0.007 0.002,-0.014 0.005,-0.019 z m 19.742,19.742 29.456,29.456 c 0.013,0.013 0.013,0.035 0,0.048 -0.007,0.006 -0.015,0.01 -0.024,0.01 h -58.864 c -0.019,0 -0.034,-0.016 -0.034,-0.035 0,-0.009 0.004,-0.017 0.01,-0.023 z m 39.236,29.514 -34.375,-34.375 14.881,-14.881 22.962,49.208 c 0.01,0.014 0.006,0.033 -0.009,0.043 -0.005,0.004 -0.012,0.005 -0.018,0.005 z m 57.358,-58.437 c -17.175,-0.006 -34.178,-3.421 -50.023,-10.048 -12.738,-5.421 -24.494,-12.908 -34.794,-22.158 l -2.3,-2.029 c -14.065,-12.131 -25.267,-27.23 -32.8,-44.209 -14.65,-33.896 -14.247,-72.414 1.11,-105.995 L 657.59,506.718 c -16.379,7.531 -34.175,11.484 -52.202,11.595 -0.56,0 -1.107,0 -1.794,0 z"
+             id="path115" />
+        </g>
+      </g>
+    </g>
+    <path
+       d="M 0,0 305,1.24977"
+       stroke="#000000"
+       stroke-width="9.16667"
+       stroke-miterlimit="8"
+       stroke-dasharray="73.3333, 27.5"
+       fill="none"
+       fill-rule="evenodd"
+       transform="matrix(1,0,0,-1,727.5,976.75)"
+       id="path123" />
+    <path
+       d="M 0,0 455,1.24977"
+       stroke="#000000"
+       stroke-width="9.16667"
+       stroke-miterlimit="8"
+       stroke-dasharray="73.3333, 27.5"
+       fill="none"
+       fill-rule="evenodd"
+       transform="matrix(1,0,0,-1,727.5,452.75)"
+       id="path125" />
+    <text
+       font-family="'Microsoft YaHei', 'Microsoft YaHei_MSFontService', sans-serif"
+       font-weight="400"
+       font-size="83px"
+       transform="translate(688.258,937)"
+       id="text129">定位信息<tspan
+   font-size="83px"
+   x="49.818401"
+   y="-523"
+   id="tspan127">通信与控制</tspan></text>
+    <rect
+       x="3495.5"
+       y="561.5"
+       width="508"
+       height="328"
+       stroke="#000000"
+       stroke-width="9.16667"
+       stroke-miterlimit="8"
+       stroke-dasharray="36.6667, 27.5"
+       fill="none"
+       id="rect131" />
+    <text
+       font-family="DengXian, DengXian_MSFontService, sans-serif"
+       font-weight="400"
+       font-size="110px"
+       transform="translate(3528.75,696)"
+       id="text135">无线反向<tspan
+   font-size="110px"
+   x="0"
+   y="132"
+   id="tspan133">充电模块</tspan></text>
+    <path
+       d="m 3340.5,725.5 155,10e-4"
+       stroke="#000000"
+       stroke-width="9.16667"
+       stroke-miterlimit="8"
+       fill="none"
+       fill-rule="evenodd"
+       id="path137" />
+    <g
+       clip-path="url(#clip7)"
+       id="g149">
+      <g
+         clip-path="url(#clip8)"
+         id="g147">
+        <g
+           clip-path="url(#clip9)"
+           id="g145">
+          <path
+             d="m 500.125,1381.13 h -6.875 v 233.82 h 137.5 v -233.82 z m 123.75,226.95 H 500.125 V 1388 h 123.75 z"
+             id="path139" />
+          <path
+             d="M 641.062,1346.75 H 482.938 c -3.793,0.01 -6.864,3.08 -6.875,6.88 v 288.83 c 0.013,3.79 3.083,6.86 6.875,6.88 h 158.124 c 3.791,-0.02 6.86,-3.09 6.876,-6.88 v -288.83 c -0.014,-3.8 -3.084,-6.87 -6.876,-6.88 z m 0,295.71 H 482.938 v -288.83 h 158.124 z"
+             id="path141" />
+          <path
+             d="m 548.25,1370.81 h 30.938 c 1.898,0 3.437,-1.54 3.437,-3.43 0,-1.9 -1.539,-3.44 -3.437,-3.44 H 548.25 c -1.898,0 -3.438,1.54 -3.438,3.44 0,1.89 1.54,3.43 3.438,3.43 z"
+             id="path143" />
+        </g>
+      </g>
+    </g>
+    <path
+       d="m 727.5,1498.5 455,1.25"
+       stroke="#000000"
+       stroke-width="9.16667"
+       stroke-miterlimit="8"
+       stroke-dasharray="73.3333, 27.5"
+       fill="none"
+       fill-rule="evenodd"
+       id="path151" />
+    <text
+       font-family="'Microsoft YaHei', 'Microsoft YaHei_MSFontService', sans-serif"
+       font-weight="400"
+       font-size="83px"
+       transform="translate(840.131,1594)"
+       id="text153">实时信息</text>
+    <path
+       d="m 727.5,1498.5 455,525"
+       stroke="#000000"
+       stroke-width="9.16667"
+       stroke-miterlimit="8"
+       stroke-dasharray="73.3333, 27.5"
+       fill="none"
+       fill-rule="evenodd"
+       id="path155" />
+    <g
+       clip-path="url(#clip10)"
+       id="g167">
+      <g
+         clip-path="url(#clip11)"
+         id="g165">
+        <g
+           clip-path="url(#clip12)"
+           id="g163">
+          <path
+             d="m 449.009,2003.17 -4.513,-5.39 c -19.682,25.69 -30.335,57.17 -30.308,89.53 v 13.75 h 6.875 v -13.75 c -0.017,-17.17 3.121,-34.2 9.257,-50.24 l 20.326,8.71 2.708,-6.31 -20.405,-8.75 c 4.295,-9.76 9.682,-19.01 16.06,-27.55 z"
+             id="path157" />
+          <path
+             d="m 562,1939.5 c -33.151,-0.02 -65.337,11.16 -91.334,31.72 l 5.328,4.56 c 9.06,-7.01 18.939,-12.89 29.418,-17.51 l 8.741,20.4 6.319,-2.71 -8.697,-20.28 c 14.952,-5.73 30.778,-8.86 46.787,-9.23 v 23.99 h 6.876 v -23.98 c 16.008,0.37 31.834,3.48 46.791,9.2 l -8.701,20.29 6.319,2.71 8.738,-20.39 c 14.977,6.6 28.693,15.76 40.538,27.06 l -17.053,17.05 4.86,4.86 17.054,-17.05 c 11.297,11.84 20.452,25.56 27.056,40.53 l -20.394,8.74 2.708,6.32 20.302,-8.7 c 6.144,16.04 9.29,33.06 9.282,50.23 v 13.75 h 6.874 v -13.75 C 709.72,2005.72 643.596,1939.59 562,1939.5 Z"
+             id="path159" />
+          <path
+             d="m 574.719,2078.66 c -0.479,-0.63 -1.06,-1.18 -1.719,-1.62 L 450.793,1972.75 c -1.455,-1.21 -3.623,-1.02 -4.842,0.43 -1.061,1.27 -1.071,3.11 -0.025,4.39 l 103.527,123.64 c 3.254,3.76 7.977,5.93 12.949,5.94 3.979,0 7.83,-1.4 10.88,-3.96 7.05,-6.19 7.86,-16.89 1.825,-24.08 -0.137,-0.14 -0.267,-0.29 -0.388,-0.45 z m -5.913,19.31 c -4.265,3.5 -10.543,2.95 -14.135,-1.24 l -76.89,-91.81 c -0.013,-0.01 -0.012,-0.03 0.002,-0.05 0.014,-0.01 0.036,-0.01 0.05,0 l 90.935,77.61 c 0.142,0.11 0.293,0.22 0.451,0.32 0.058,0.07 0.113,0.14 0.175,0.22 0.19,0.24 0.394,0.47 0.612,0.68 3.487,4.31 2.958,10.6 -1.2,14.27 z"
+             id="path161" />
+        </g>
+      </g>
+    </g>
+    <path
+       d="m 727.5,2022.5 h 455"
+       stroke="#000000"
+       stroke-width="9.16667"
+       stroke-miterlimit="8"
+       stroke-dasharray="73.3333, 27.5"
+       fill="none"
+       fill-rule="evenodd"
+       id="path169" />
+    <text
+       font-family="'Microsoft YaHei', 'Microsoft YaHei_MSFontService', sans-serif"
+       font-weight="400"
+       font-size="83px"
+       transform="translate(748.75,2121)"
+       id="text171">传感器互联</text>
+    <rect
+       x="3766.5"
+       y="1515.5"
+       width="237"
+       height="147"
+       stroke="#000000"
+       stroke-width="9.16667"
+       stroke-miterlimit="8"
+       stroke-dasharray="36.6667, 27.5"
+       fill="none"
+       id="rect173" />
+    <text
+       font-family="DengXian, DengXian_MSFontService, sans-serif"
+       font-weight="400"
+       font-size="83px"
+       transform="translate(3801.52,1616)"
+       id="text175">选做</text>
+    <rect
+       x="3766.5"
+       y="1333.5"
+       width="237"
+       height="147"
+       stroke="#000000"
+       stroke-width="9.16667"
+       stroke-miterlimit="8"
+       fill="none"
+       id="rect177" />
+    <text
+       font-family="DengXian, DengXian_MSFontService, sans-serif"
+       font-weight="400"
+       font-size="83px"
+       transform="translate(3801.52,1434)"
+       id="text179">必做</text>
+  </g>
+</svg>
