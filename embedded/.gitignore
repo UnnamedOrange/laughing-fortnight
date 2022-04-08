@@ -13,3 +13,6 @@ BUILD
 GettingStarted.html
 mbed_config.h
 DebugConfig/
+
+# VS Code
+.vscode/
