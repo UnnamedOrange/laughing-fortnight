@@ -1,13 +1,10 @@
 {
-    "requires": ["bare-metal"],
     "target_overrides": {
         "*": {
             "platform.callback-nontrivial": true,
             "platform.crash-capture-enabled": false,
             "target.c_lib": "std"
         },
-        "NUCLEO_L476RG": {
-            "target.clock_source": "USE_PLL_HSE_XTAL"
-        }
+        "NUCLEO_L476RG": {}
     }
 }
