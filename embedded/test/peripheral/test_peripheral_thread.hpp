@@ -43,6 +43,8 @@ namespace test
             // 延迟五秒，期望五秒后看到子线程开始的信息。
             rtos::ThisThread::sleep_for(5s);
             _fp.start();
+            // 主线程等待，确保子线程的输出语句能够执行。
+            rtos::ThisThread::sleep_for(1s);
             // 不是死循环，主模块立即被销毁，期望看到报错。
         }
     };
