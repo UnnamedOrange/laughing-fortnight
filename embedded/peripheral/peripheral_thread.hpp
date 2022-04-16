@@ -63,7 +63,7 @@ namespace peripheral
         {
             // 假设该过程在正常情况下总是不会发生。
             _thread.terminate();
-            debug("Warning: Thread terminated unexpectedly.\n");
+            debug("[Warning] Thread terminated unexpectedly.\n");
         }
 
     protected:
