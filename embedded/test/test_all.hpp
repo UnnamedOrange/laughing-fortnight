@@ -12,6 +12,7 @@
 #include <utils/app.hpp>
 
 #include "peripheral/test_peripheral_thread.hpp"
+#include "peripheral/test_peripheral_std_framework.hpp"
 
 namespace test
 {
@@ -26,5 +27,6 @@ namespace test
     {
         // 在此处添加要测试的 app 类。
         utils::run_app<test_peripheral_thread>();
+        utils::run_app<test_peripheral_std_framework>();
     }
 } // namespace test
