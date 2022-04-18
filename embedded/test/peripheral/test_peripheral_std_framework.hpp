@@ -16,6 +16,7 @@
 
 #include <peripheral/peripheral_std_framework.hpp>
 #include <utils/app.hpp>
+#include <utils/debug.hpp>
 
 namespace test
 {
@@ -39,13 +40,13 @@ namespace test
                 {
                 case 0:
                 {
-                    debug("[Info] OK. Message id 0 received.\n");
+                    utils::debug_printf("[Info] OK. Message id 0 received.\n");
                     break;
                 }
                 case 1:
                 {
                     int value = *std::static_pointer_cast<int>(data);
-                    debug(
+                    utils::debug_printf(
                         "[Info] OK. Message id 1 received with parameter %d.\n",
                         value);
                     break;
@@ -57,14 +58,16 @@ namespace test
                     std::string vec_str;
                     for (const auto& t : value.vec)
                         vec_str += std::to_string(t) + " ";
-                    debug("[Info] OK. Message id 2 received with parameter "
-                          "\"%s\" and vector %s.\n",
-                          value.str.c_str(), vec_str.c_str());
+                    utils::debug_printf(
+                        "[Info] OK. Message id 2 received with parameter "
+                        "\"%s\" and vector %s.\n",
+                        value.str.c_str(), vec_str.c_str());
                     break;
                 }
                 case 3:
                 {
-                    debug("[Info] Message id 3 received. 0 is pushed.\n");
+                    utils::debug_printf(
+                        "[Info] Message id 3 received. 0 is pushed.\n");
                     push(0, nullptr);
                     break;
                 }
@@ -75,9 +78,10 @@ namespace test
     public:
         test_peripheral_std_framework()
         {
-            debug("\n");
-            debug("[Info] Test for peripheral_std_framework starts 1 second "
-                  "later.\n");
+            utils::debug_printf("\n");
+            utils::debug_printf(
+                "[Info] Test for peripheral_std_framework starts 1 second "
+                "later.\n");
             rtos::ThisThread::sleep_for(1s);
             _fp.start();
 
@@ -95,7 +99,8 @@ namespace test
             // 等待子线程输出结束后再输出提示信息。
             rtos::ThisThread::sleep_for(1s);
             // 收到警告是正常现象。
-            debug("[Info] The warning 1 second later can be ignored.\n");
+            utils::debug_printf(
+                "[Info] The warning 1 second later can be ignored.\n");
             // 之后的延迟来源于 peripheral_std_framework 的析构函数。
         }
     };

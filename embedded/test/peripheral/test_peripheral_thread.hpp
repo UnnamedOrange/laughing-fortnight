@@ -13,6 +13,7 @@
 
 #include <peripheral/peripheral_thread.hpp>
 #include <utils/app.hpp>
+#include <utils/debug.hpp>
 
 namespace test
 {
@@ -28,7 +29,7 @@ namespace test
         {
             void thread_main() override
             {
-                debug("[Info] thread_main starts.\n");
+                utils::debug_printf("[Info] thread_main starts.\n");
                 // 子线程立即结束。
             }
         };
@@ -37,9 +38,11 @@ namespace test
     public:
         test_peripheral_thread()
         {
-            debug("\n");
-            debug("[Info] Test for peripheral_thread starts 1 second later.\n");
-            debug("[Info] An info and a warning expected 5 seconds later.\n");
+            utils::debug_printf("\n");
+            utils::debug_printf(
+                "[Info] Test for peripheral_thread starts 1 second later.\n");
+            utils::debug_printf(
+                "[Info] An info and a warning expected 5 seconds later.\n");
             // 延迟五秒，期望五秒后看到子线程开始的信息。
             rtos::ThisThread::sleep_for(5s);
             _fp.start();
