@@ -11,13 +11,20 @@
 
 #include "mbed.h"
 
+#ifdef USE_TFT_FOR_DEBUG_CONSOLE
+#include <tft/tft_debug_console.hpp>
+#endif
+
 namespace utils
 {
 #if DEVICE_STDIO_MESSAGES && !defined(NDEBUG)
     namespace details
     {
         inline rtos::Semaphore _debug_semaphore{1, 1};
-    }
+#ifdef USE_TFT_FOR_DEBUG_CONSOLE
+        inline modules::tft_debug_console _debug_console;
+#endif
+    } // namespace details
 #endif
     /**
      * @brief 在 NDEBUG 宏未被定义时调试输出。
@@ -27,14 +34,15 @@ namespace utils
      * @param format 格式化字符串。
      * @param ... 参数。
      */
-    inline void debug_printf(const char* format, ...)
+    template <typename... R>
+    inline void debug_printf(const char* format, R&&... args)
     {
 #if DEVICE_STDIO_MESSAGES && !defined(NDEBUG)
         details::_debug_semaphore.acquire();
-        va_list args;
-        va_start(args, format);
-        vfprintf(stderr, format, args);
-        va_end(args);
+        debug(format, std::forward<R>(args)...);
+#ifdef USE_TFT_FOR_DEBUG_CONSOLE
+        details::_debug_console.printf(format, std::forward<R>(args)...);
+#endif
         details::_debug_semaphore.release();
 #endif
     }
