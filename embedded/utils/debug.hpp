@@ -20,9 +20,12 @@ namespace utils
 #if DEVICE_STDIO_MESSAGES && !defined(NDEBUG)
     namespace details
     {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wc++17-extensions"
         inline rtos::Semaphore _debug_semaphore{1, 1};
 #ifdef USE_TFT_FOR_DEBUG_CONSOLE
         inline modules::tft_debug_console _debug_console;
+#pragma GCC diagnostic pop
 #endif
     } // namespace details
 #endif
@@ -39,7 +42,10 @@ namespace utils
     {
 #if DEVICE_STDIO_MESSAGES && !defined(NDEBUG)
         details::_debug_semaphore.acquire();
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-security"
         debug(format, std::forward<R>(args)...);
+#pragma GCC diagnostic pop
 #ifdef USE_TFT_FOR_DEBUG_CONSOLE
         details::_debug_console.printf(format, std::forward<R>(args)...);
 #endif
