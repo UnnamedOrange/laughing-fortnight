@@ -40,14 +40,14 @@ namespace test
                 {
                 case 0:
                 {
-                    utils::debug_printf("[Info] OK. Message id 0 received.\n");
+                    utils::debug_printf("[I] OK. Message id 0 received.\n");
                     break;
                 }
                 case 1:
                 {
                     int value = *std::static_pointer_cast<int>(data);
                     utils::debug_printf(
-                        "[Info] OK. Message id 1 received with parameter %d.\n",
+                        "[I] OK. Message id 1 received with parameter %d.\n",
                         value);
                     break;
                 }
@@ -59,7 +59,7 @@ namespace test
                     for (const auto& t : value.vec)
                         vec_str += std::to_string(t) + " ";
                     utils::debug_printf(
-                        "[Info] OK. Message id 2 received with parameter "
+                        "[I] OK. Message id 2 received with parameter "
                         "\"%s\" and vector %s.\n",
                         value.str.c_str(), vec_str.c_str());
                     break;
@@ -67,7 +67,7 @@ namespace test
                 case 3:
                 {
                     utils::debug_printf(
-                        "[Info] Message id 3 received. 0 is pushed.\n");
+                        "[I] Message id 3 received. 0 is pushed.\n");
                     push(0, nullptr);
                     break;
                 }
@@ -80,7 +80,7 @@ namespace test
         {
             utils::debug_printf("\n");
             utils::debug_printf(
-                "[Info] Test for peripheral_std_framework starts 1 second "
+                "[I] Test for peripheral_std_framework starts 1 second "
                 "later.\n");
             rtos::ThisThread::sleep_for(1s);
             _fp.start();
@@ -100,7 +100,7 @@ namespace test
             rtos::ThisThread::sleep_for(1s);
             // 收到警告是正常现象。
             utils::debug_printf(
-                "[Info] The warning 1 second later can be ignored.\n");
+                "[I] The warning 1 second later can be ignored.\n");
             // 之后的延迟来源于 peripheral_std_framework 的析构函数。
         }
     };

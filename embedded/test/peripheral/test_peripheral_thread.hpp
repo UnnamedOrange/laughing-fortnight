@@ -29,7 +29,7 @@ namespace test
         {
             void thread_main() override
             {
-                utils::debug_printf("[Info] thread_main starts.\n");
+                utils::debug_printf("[I] thread_main starts.\n");
                 // 子线程立即结束。
             }
         };
@@ -40,9 +40,9 @@ namespace test
         {
             utils::debug_printf("\n");
             utils::debug_printf(
-                "[Info] Test for peripheral_thread starts 1 second later.\n");
+                "[I] Test for peripheral_thread starts 1 second later.\n");
             utils::debug_printf(
-                "[Info] An info and a warning expected 5 seconds later.\n");
+                "[I] An info and a warning expected 5 seconds later.\n");
             // 延迟五秒，期望五秒后看到子线程开始的信息。
             rtos::ThisThread::sleep_for(5s);
             _fp.start();

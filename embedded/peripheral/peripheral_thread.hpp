@@ -65,7 +65,7 @@ namespace peripheral
         {
             // 假设该过程在正常情况下总是不会发生。
             _thread.terminate();
-            utils::debug_printf("[Warning] Thread terminated unexpectedly.\n");
+            utils::debug_printf("[W] Thread terminated unexpectedly.\n");
         }
 
     protected:
