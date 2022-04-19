@@ -430,19 +430,27 @@ namespace modules
         rtos::ConditionVariable cv_draw{mutex_draw};
         void draw_task()
         {
+            int cursor_counter = 0;
             bool draw_cursor = true;
             while (true)
             {
                 rtos::ScopedMutexLock lock{mutex_draw};
                 if (cv_draw.wait_for(
-                        500ms, [this]() { return console.has_updated(); }))
+                        125ms, [this]() { return console.has_updated(); }))
                 {
                     console.clear_update_tag();
+                    cursor_counter = 0;
                     draw_cursor = true;
                 }
                 else
                 {
-                    draw_cursor = !draw_cursor;
+                    console.update_status();
+                    cursor_counter += 1;
+                    if (cursor_counter >= 8)
+                    {
+                        draw_cursor = !draw_cursor;
+                        cursor_counter = 4;
+                    }
                 }
                 draw_console(draw_cursor);
             }
@@ -466,17 +474,41 @@ namespace modules
             void print(std::string_view str)
             {
                 updated = true;
-                for (char ch : str)
+                if (str == "Done\n" || str == "Fail\n")
                 {
-                    if (ch == '\r')
-                        continue;
-                    else if (ch == '\n')
-                        buffer.push_back("");
-                    else
-                        buffer.back().push_back(ch);
+                    bool flag = false;
+                    for (auto it = buffer.rbegin(); it != buffer.rend(); it++)
+                    {
+                        if ((*it).substr(0, 3) == "[-]" ||
+                            (*it).substr(0, 3) == "[\\]" ||
+                            (*it).substr(0, 3) == "[|]" ||
+                            (*it).substr(0, 3) == "[/]")
+                        {
+                            if (str == "Done\n")
+                                (*it)[1] = '*';
+                            else // Fail
+                                (*it)[1] = 'x';
+                            flag = true;
+                            break;
+                        }
+                    }
+                    if (!flag)
+                        print("[E] No matched task.\n");
                 }
-                while (buffer.size() > max_n_line)
-                    buffer.pop_front();
+                else
+                {
+                    for (char ch : str)
+                    {
+                        if (ch == '\r')
+                            continue;
+                        else if (ch == '\n')
+                            buffer.push_back("");
+                        else
+                            buffer.back().push_back(ch);
+                    }
+                    while (buffer.size() > max_n_line)
+                        buffer.pop_front();
+                }
             }
             bool has_updated() const
             {
@@ -485,6 +517,20 @@ namespace modules
             void clear_update_tag()
             {
                 updated = false;
+            }
+            void update_status()
+            {
+                for (auto& line : buffer)
+                {
+                    if (line.substr(0, 3) == "[-]")
+                        line[1] = '\\';
+                    else if (line.substr(0, 3) == "[\\]")
+                        line[1] = '|';
+                    else if (line.substr(0, 3) == "[|]")
+                        line[1] = '/';
+                    else if (line.substr(0, 3) == "[/]")
+                        line[1] = '-';
+                }
             }
         } console;
         void draw_console(bool draw_cursor)
@@ -497,15 +543,25 @@ namespace modules
             for (const auto& line : console.buffer)
             {
                 uint16_t color = 0xFFFF;
-                if (line.find("[I]") == 0 || line.find("[Info]") == 0)
+                if (line.substr(0, 3) == "[I]")
                     color =
                         (0 >> 3) + (255 >> 2 << 5) + (0 >> 3 << 11); // B G R
-                else if (line.find("[W]") == 0 || line.find("[Warning]") == 0)
+                else if (line.substr(0, 3) == "[W]")
                     color =
                         (0 >> 3) + (255 >> 2 << 5) + (255 >> 3 << 11); // B G R
-                else if (line.find("[E]") == 0 || line.find("[Error]") == 0)
+                else if (line.substr(0, 3) == "[E]" ||
+                         line.substr(0, 3) == "[x]")
                     color =
                         (0 >> 3) + (0 >> 2 << 5) + (255 >> 3 << 11); // B G R
+                else if (line.substr(0, 3) == "[-]" ||
+                         line.substr(0, 3) == "[\\]" ||
+                         line.substr(0, 3) == "[|]" ||
+                         line.substr(0, 3) == "[/]")
+                    color =
+                        (0 >> 3) + (114 >> 2 << 5) + (230 >> 3 << 11); // B G R
+                else if (line.substr(0, 3) == "[*]")
+                    color =
+                        (255 >> 3) + (255 >> 2 << 5) + (0 >> 3 << 11); // B G R
                 draw_string_vram(line, 0, y, color, 0x0000);
                 y += cy_char;
             }
