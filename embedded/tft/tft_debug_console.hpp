@@ -15,6 +15,8 @@
 #include <algorithm>
 #include <array>
 #include <cinttypes>
+#include <deque>
+#include <string>
 #include <string_view>
 #include <vector>
 
@@ -375,7 +377,7 @@ namespace modules
 
     private:
         // 在缓冲区上直接画字符。
-        void draw_char_vram(char ch, uint8_t x, uint8_t y, uint16_t text_color,
+        void draw_char_vram(char ch, int x, int y, uint16_t text_color,
                             uint16_t bg_color)
         {
             if (ch < 0x20 || ch > 0x7f)
@@ -387,6 +389,8 @@ namespace modules
             uint8_t idx_char = ch - 0x20;
             for (int y_char = 0; y_char < cy_char; y_char++)
             {
+                if (y + y_char < 0)
+                    continue;
                 if (y + y_char >= cy)
                     break;
                 uint8_t bits = font[idx_char * byte_length + y_char];
@@ -404,9 +408,11 @@ namespace modules
             }
         }
         // 在缓冲区上直接画字符串，不会自动换行。
-        void draw_string_vram(std::string_view str, uint8_t x, uint8_t y,
+        void draw_string_vram(std::string_view str, int x, int y,
                               uint16_t text_color, uint16_t bg_color)
         {
+            if (y + cy_char < 0 || y >= cy)
+                return;
             for (char ch : str)
             {
                 if (x >= cx)
@@ -416,10 +422,73 @@ namespace modules
             }
         }
 
+    private:
+        struct console_buffer
+        {
+            static constexpr size_t max_n_line = n_line * 2;
+            std::deque<std::string> buffer;
+            void clear()
+            {
+                buffer.clear();
+                buffer.push_back("");
+            }
+            void print(std::string_view str)
+            {
+                for (char ch : str)
+                {
+                    if (ch == '\r')
+                        continue;
+                    else if (ch == '\n')
+                        buffer.push_back(std::string{});
+                    else
+                        buffer.back().push_back(ch);
+                }
+                while (buffer.size() > max_n_line)
+                    buffer.pop_front();
+            }
+        } console;
+        void draw_console(bool draw_cursor)
+        {
+            for (auto& line : vram)
+                line.fill(0);
+            int y =
+                -cy_char *
+                std::max(0, static_cast<int>(console.buffer.size()) - n_line);
+            for (const auto& line : console.buffer)
+            {
+                uint16_t color = 0xFFFF;
+                if (line.find("[I]") == 0 || line.find("[Info]") == 0)
+                    color =
+                        (0 >> 3) + (255 >> 2 << 5) + (0 >> 3 << 11); // B G R
+                else if (line.find("[W]") == 0 || line.find("[Warning]") == 0)
+                    color =
+                        (0 >> 3) + (255 >> 2 << 5) + (255 >> 3 << 11); // B G R
+                else if (line.find("[E]") == 0 || line.find("[Error]") == 0)
+                    color =
+                        (0 >> 3) + (0 >> 2 << 5) + (255 >> 3 << 11); // B G R
+                draw_string_vram(line, 0, y, color, 0x0000);
+                y += cy_char;
+            }
+            y -= cy_char;
+            if (draw_cursor)
+            {
+                draw_char_vram('_', console.buffer.back().size() * cx_char, y,
+                               0xFFFF, 0x0000);
+            }
+            blt();
+        }
+
     public:
         template <typename... R>
         void printf(const char* format, R&&... args)
         {
+            char buf[256];
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-security"
+            sprintf(buf, format, std::forward<R>(args)...);
+#pragma GCC diagnostic pop
+            console.print(buf);
+            draw_console(true);
         }
     };
 } // namespace modules
