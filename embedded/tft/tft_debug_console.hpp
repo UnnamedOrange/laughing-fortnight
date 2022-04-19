@@ -336,6 +336,8 @@ namespace modules
             blt();
             rtos::ThisThread::sleep_for(50ms);
             set_led(true);
+
+            thread_draw.start(std::bind(&tft_debug_console::draw_task, this));
         }
 
     private:
@@ -423,10 +425,39 @@ namespace modules
         }
 
     private:
+        rtos::Thread thread_draw;
+        rtos::Mutex mutex_draw;
+        rtos::ConditionVariable cv_draw{mutex_draw};
+        void draw_task()
+        {
+            bool draw_cursor = true;
+            while (true)
+            {
+                rtos::ScopedMutexLock lock{mutex_draw};
+                if (cv_draw.wait_for(
+                        500ms, [this]() { return console.has_updated(); }))
+                {
+                    console.clear_update_tag();
+                    draw_cursor = true;
+                }
+                else
+                {
+                    draw_cursor = !draw_cursor;
+                }
+                draw_console(draw_cursor);
+            }
+        }
+
+    private:
         struct console_buffer
         {
             static constexpr size_t max_n_line = n_line * 2;
             std::deque<std::string> buffer;
+            bool updated{};
+            console_buffer()
+            {
+                clear();
+            }
             void clear()
             {
                 buffer.clear();
@@ -434,17 +465,26 @@ namespace modules
             }
             void print(std::string_view str)
             {
+                updated = true;
                 for (char ch : str)
                 {
                     if (ch == '\r')
                         continue;
                     else if (ch == '\n')
-                        buffer.push_back(std::string{});
+                        buffer.push_back("");
                     else
                         buffer.back().push_back(ch);
                 }
                 while (buffer.size() > max_n_line)
                     buffer.pop_front();
+            }
+            bool has_updated() const
+            {
+                return updated;
+            }
+            void clear_update_tag()
+            {
+                updated = false;
             }
         } console;
         void draw_console(bool draw_cursor)
@@ -487,8 +527,9 @@ namespace modules
 #pragma GCC diagnostic ignored "-Wformat-security"
             sprintf(buf, format, std::forward<R>(args)...);
 #pragma GCC diagnostic pop
+            rtos::ScopedMutexLock lock(mutex_draw);
             console.print(buf);
-            draw_console(true);
+            cv_draw.notify_one();
         }
     };
 } // namespace modules
