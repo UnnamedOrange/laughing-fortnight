@@ -12,8 +12,8 @@ class Config:
             self.config.read(self.config_file_path)
             return self.config[section][item]
 
-    def get_domain(self):
-        self.get("Domain", "ServerDomain")
+    def get_host(self):
+        self.get("Host", "ServerHost")
 
     def get_port(self):
         self.get("Default", "Port")
