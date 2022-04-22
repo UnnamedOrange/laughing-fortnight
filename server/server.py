@@ -46,12 +46,12 @@ def download_position():
     return jsonify(position), 200, {"Content-Type":"application/json"}
 
 
-@app.route('/uploadAwakening')
-def upload_awakening():
+@app.route('/uploadCalling')
+def upload_calling():
     """
-    ## upload_awakening
+    ## upload_calling
     @Description:
-    用于维护上传触发唤醒的接口`/uploadAwakening`。
+    用于维护上传触发唤醒的接口`/uploadCalling`。
     上传触发唤醒的状态变量，当APP端呼叫车载端时此变量为1
     ---------
     @Returns:
@@ -59,26 +59,26 @@ def upload_awakening():
     -------
     """
     
-    is_being_called = request.args.get('isBeingCalled')
-    with open('data/beingcalled.json', 'w', encoding='utf-8') as f:
-        json.dump({'isBeingCalled':is_being_called }, f)
+    calling = request.args.get('calling')
+    with open('data/calling.json', 'w', encoding='utf-8') as f:
+        json.dump({'calling':calling }, f)
     return jsonify(status='success')
 
-@app.route('/downloadAwakening')
-def download_awakening():
+@app.route('/downloadCalling')
+def download_calling():
     """
-    ## download_awakening
+    ## download_calling
     @Description:
-    用于维护下载触发唤醒的接口`/downloadAwakening`
+    用于维护下载触发唤醒的接口`/downloadCalling`
     ---------
     @Returns:
     当前服务器上保存的触发唤醒状态，`1`为正在触发
     -------
     """
 
-    with open('data/beingcalled.json', 'r', encoding='utf-8') as f:
-        is_being_called = json.load(f)
-    return jsonify(is_being_called), 200, {"Content-Type":"application/json"}
+    with open('data/calling.json', 'r', encoding='utf-8') as f:
+        calling = json.load(f)
+    return jsonify(calling), 200, {"Content-Type":"application/json"}
 
 if __name__ == '__main__':
     # 这里的“0.0.0.0”代表任何ip都可访问，并非写成服务器的ip地址

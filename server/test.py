@@ -27,23 +27,22 @@ class TestServer(unittest.TestCase):
         received_position = json.loads(r.text)
         self.assertEqual(received_position, position)
     
-    def test_caller(self):
+    def test_calling(self):
         """
         @Description:
         测试呼叫功能相关状态变量
         """
         log = logging.getLogger('TestServer.test_caller')
         log.setLevel(logging.DEBUG)
-        is_being_called = {'isBeingCalled': 'true'}
-        r = requests.get(f"{conf.get_domain()}:{conf.get_port()}/uploadAwakening", params=is_being_called)
+        calling = {'calling': 'true'}
+        r = requests.get(f"{conf.get_domain()}:{conf.get_port()}/uploadCalling", params=calling)
         self.assertEqual(r.status_code, 200)
 
-        r = requests.get(f"{conf.get_domain()}:{conf.get_port()}/downloadAwakening")
+        r = requests.get(f"{conf.get_domain()}:{conf.get_port()}/downloadCalling")
         self.assertEqual(r.status_code, 200)
 
         received_position = json.loads(r.text)
-        self.assertEqual(received_position, is_being_called)
-        log.debug('test')
+        self.assertEqual(received_position, calling)
 
 
 if __name__ == '__main__':
