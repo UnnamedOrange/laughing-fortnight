@@ -1,7 +1,10 @@
 from flask import Flask, request, jsonify
 import json
+import config
 
 app = Flask(__name__)
+
+conf = config.Config()
 
 # 检查经纬度信息的可行性
 def check_titude(x):
@@ -40,4 +43,4 @@ def download_awakening():
 
 if __name__ == '__main__':
     # **这里得“0.0.0.0”代表任何ip都可访问，并非写成你的ip地址**端口是5000，你的安全组配置5000端口一定要打开
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=conf.get_port())
