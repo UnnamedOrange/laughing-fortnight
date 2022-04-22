@@ -13,7 +13,10 @@ class Config:
             return self.config[section][item]
 
     def get_host(self):
-        self.get("Host", "ServerHost")
+        return self.get("Host", "ServerHost")
 
     def get_port(self):
-        self.get("DEFAULT", "Port")
+        return self.get("DEFAULT", "Port")
+
+    def get_domain(self):
+        return self.get("Host", "ServerDomain")
