@@ -34,7 +34,7 @@ class TestServer(unittest.TestCase):
         """
         log = logging.getLogger('TestServer.test_caller')
         log.setLevel(logging.DEBUG)
-        calling = {'calling': 'true'}
+        calling = {'calling': 1}
         r = requests.get(f"{conf.get_domain()}:{conf.get_port()}/uploadCalling", params=calling)
         self.assertEqual(r.status_code, 200)
 
