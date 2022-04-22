@@ -14,7 +14,8 @@ def check_titude(x):
 def upload_position():
     """
     @Description:
-    用于维护上传位置的接口`/uploadPosition`
+    用于维护上传位置的接口`/uploadPosition`。
+    两个参数，经度`longitude`和纬度`latitude`。
     ---------
     @Returns:
     上传状态
@@ -35,11 +36,12 @@ def download_position():
     用于维护下载位置的接口`/downloadPosition`
     ---------
     @Returns:
-    当前服务器上保存的定位经纬度字符串
+    当前服务器上保存的定位经纬度字符串。
+    两个参数，经度`longitude`和纬度`latitude`
     -------
     """
 
-    with open('data/position.json', 'r', encoding='utf-8') as f:
+    with open('data/position.json', 'r', encoding='utf-8') as f: # 获取服务器端保存的定位经纬度信息
         position = json.load(f)
     return jsonify(position), 200, {"Content-Type":"application/json"}
 
@@ -47,8 +49,10 @@ def download_position():
 @app.route('/uploadAwakening')
 def upload_awakening():
     """
+    ## upload_awakening
     @Description:
-    用于维护上传触发唤醒的接口`/uploadAwakening`
+    用于维护上传触发唤醒的接口`/uploadAwakening`。
+    上传触发唤醒的状态变量，当APP端呼叫车载端时此变量为1
     ---------
     @Returns:
     上传状态
@@ -56,7 +60,6 @@ def upload_awakening():
     """
     
     is_being_called = request.args.get('isBeingCalled')
-    print('isBeingCalled:' + is_being_called)
     with open('data/beingcalled.json', 'w', encoding='utf-8') as f:
         json.dump({'isBeingCalled':is_being_called }, f)
     return jsonify(status='success')
@@ -64,6 +67,7 @@ def upload_awakening():
 @app.route('/downloadAwakening')
 def download_awakening():
     """
+    ## download_awakening
     @Description:
     用于维护下载触发唤醒的接口`/downloadAwakening`
     ---------
@@ -77,6 +81,6 @@ def download_awakening():
     return jsonify(is_being_called), 200, {"Content-Type":"application/json"}
 
 if __name__ == '__main__':
-    # 这里得“0.0.0.0”代表任何ip都可访问，并非写成服务器的ip地址
+    # 这里的“0.0.0.0”代表任何ip都可访问，并非写成服务器的ip地址
     # 端口是5000，服务器安全组配置5000端口要打开
     app.run(host=conf.get_host(), port=conf.get_port())

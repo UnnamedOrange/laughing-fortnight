@@ -9,6 +9,11 @@ conf = config.Config()
 
 class TestServer(unittest.TestCase):
     def test_position(self):
+        """
+        @Description:
+        测试位置信息的上传下载是否正常
+        """
+
         log = logging.getLogger('TestServer.test_position')
         log.setLevel(logging.DEBUG)
 
@@ -23,6 +28,10 @@ class TestServer(unittest.TestCase):
         self.assertEqual(received_position, position)
     
     def test_caller(self):
+        """
+        @Description:
+        测试呼叫功能相关状态变量
+        """
         log = logging.getLogger('TestServer.test_caller')
         log.setLevel(logging.DEBUG)
         is_being_called = {'isBeingCalled': 'true'}
