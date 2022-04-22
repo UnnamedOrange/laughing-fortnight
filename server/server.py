@@ -8,9 +8,12 @@ app = Flask(__name__)
 conf = config.Config()
 
 # 检查经纬度信息的可行性
+
+
 def check_titude(x):
     # @TODO: 使用正则表达式，后续和硬件端上传格式进行对接
     return True
+
 
 @app.route('/uploadPosition')
 def upload_position():
@@ -23,13 +26,14 @@ def upload_position():
     上传状态
     -------
     """
-    
-    longitude = request.args.get('longitude') # 获取request中的经度信息
-    latitude = request.args.get('latitude') # 获取request中的纬度信息
+
+    longitude = request.args.get('longitude')  # 获取request中的经度信息
+    latitude = request.args.get('latitude')  # 获取request中的纬度信息
     # print('longitude:' + longitude + ',' + 'latitude:' + latitude) # 打印经纬度信息，调试用
     with open('data/position.json', 'w', encoding='utf-8') as f:
-        json.dump({'longitude':longitude, 'latitude':latitude},f) # 保存经纬度信息
-    return jsonify(status='success') # 返回上传状态
+        json.dump({'longitude': longitude, 'latitude': latitude}, f)  # 保存经纬度信息
+    return jsonify(status='success')  # 返回上传状态
+
 
 @app.route('/downloadPosition')
 def download_position():
@@ -43,9 +47,9 @@ def download_position():
     -------
     """
 
-    with open('data/position.json', 'r', encoding='utf-8') as f: # 获取服务器端保存的定位经纬度信息
+    with open('data/position.json', 'r', encoding='utf-8') as f:  # 获取服务器端保存的定位经纬度信息
         position = json.load(f)
-    return jsonify(position), 200, {"Content-Type":"application/json"}
+    return jsonify(position), 200, {"Content-Type": "application/json"}
 
 
 @app.route('/uploadCalling')
@@ -60,11 +64,12 @@ def upload_calling():
     上传状态
     -------
     """
-    
+
     calling = request.args.get('calling')
     with open('data/calling.json', 'w', encoding='utf-8') as f:
-        json.dump({'calling':calling }, f)
+        json.dump({'calling': calling}, f)
     return jsonify(status='success')
+
 
 @app.route('/downloadCalling')
 def download_calling():
@@ -80,7 +85,8 @@ def download_calling():
 
     with open('data/calling.json', 'r', encoding='utf-8') as f:
         calling = json.load(f)
-    return jsonify(calling), 200, {"Content-Type":"application/json"}
+    return jsonify(calling), 200, {"Content-Type": "application/json"}
+
 
 if __name__ == '__main__':
     # 这里的“0.0.0.0”代表任何ip都可访问，并非写成服务器的ip地址
