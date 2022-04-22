@@ -6,6 +6,6 @@ BraceWrapping:
   AfterCaseLabel: true
   AfterUnion: true
 ColumnLimit: 80
-IncludeBlocks: Regroup
+IncludeBlocks: Preserve
 NamespaceIndentation: All
 PointerAlignment: Left
