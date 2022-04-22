@@ -16,4 +16,4 @@ class Config:
         self.get("Host", "ServerHost")
 
     def get_port(self):
-        self.get("Default", "Port")
+        self.get("DEFAULT", "Port")

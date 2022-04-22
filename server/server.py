@@ -21,7 +21,7 @@ def upload_position():
     -------
     """
     
-    longitude = request.args.get('longitude') # 获取request中的精度信息
+    longitude = request.args.get('longitude') # 获取request中的经度信息
     latitude = request.args.get('latitude') # 获取request中的纬度信息
     # print('longitude:' + longitude + ',' + 'latitude:' + latitude) # 打印经纬度信息，调试用
     with open('data/position.json', 'w', encoding='utf-8') as f:
