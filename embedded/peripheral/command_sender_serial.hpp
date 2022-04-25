@@ -23,28 +23,30 @@ namespace peripheral
      * @note 注意不使用串口的 RX。只发不收。
      * 接收指令的类另写。
      *
-     * @note 这个类是线程安全的，@ref send_command 类可重入。
-     * 但同一模板类的不同对象不是线程安全的。应避免同一模板类具有多个对象。
+     * @note 串口必须工作在双工模式下，所以需要传入一个全局对象的引用。
      *
-     * @todo 测试这个类。
+     * @note 考虑到线程安全问题，同一个 BufferedSerial 应该只有一个 sender 和
+     * receiver。
      *
-     * @tparam PIN_TX 串口的 TX 管脚（CPU 端）。
-     * @tparam baud 串口的波特率。默认为配置文件中设置的值，默认 9600。
+     * @note 这个类本身是线程安全的。
      */
-    template <PinName PIN_TX,
-              int baud = MBED_CONF_PLATFORM_DEFAULT_SERIAL_BAUD_RATE>
     class command_sender_serial : public command_sender_base
     {
     private:
-        mbed::BufferedSerial _serial{PIN_TX, NC, baud};
+        mbed::BufferedSerial& _serial;
+
+    public:
+        command_sender_serial(mbed::BufferedSerial& serial) : _serial(serial)
+        {
+        }
 
     public:
         /**
          * @brief 通过串口发送指令。
          *
-         * @note 该函数可重入。但同一模板类的不同对象不是线程安全的。
+         * @note 该函数可重入。
          *
-         * @note 默认是阻塞的。
+         * @note 是否阻塞是不确定的。
          *
          * @param command 指令。没有自动换行。
          */
