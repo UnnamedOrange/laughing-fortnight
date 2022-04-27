@@ -21,6 +21,30 @@ namespace peripheral
          * @param int 最大重试次数。
          */
         send_at,
+        /**
+         * @brief 发送 ATE<echo> 指令。打开或关闭回显。
+         *
+         * @param bool 是否打开回显。
+         */
+        send_ate,
+        /**
+         * @brief 发送 AT+CFUN=<mode> 指令。设置功能模式。
+         *
+         * @param int 功能模式。
+         */
+        send_at_cfun_set,
+        /**
+         * @brief 发送 AT+CIMI 指令。查询卡号。
+         */
+        send_at_cimi,
+        /**
+         * @brief 发送 AT+CGATT? 指令。查询激活状态。
+         */
+        send_at_cgatt_get,
+        /**
+         * @brief 发送 AT+CESQ 指令。获取信号质量。
+         */
+        send_at_cesq,
 
         _message_end,
         /**

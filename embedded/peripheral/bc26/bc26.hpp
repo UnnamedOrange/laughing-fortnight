@@ -40,6 +40,31 @@ namespace peripheral
                 on_send_at(*std::static_pointer_cast<int>(data));
                 break;
             }
+            case bc26_message_t::send_ate:
+            {
+                on_send_ate(*std::static_pointer_cast<bool>(data));
+                break;
+            }
+            case bc26_message_t::send_at_cfun_set:
+            {
+                on_send_at_cfun_set(*std::static_pointer_cast<int>(data));
+                break;
+            }
+            case bc26_message_t::send_at_cimi:
+            {
+                on_send_at_cimi();
+                break;
+            }
+            case bc26_message_t::send_at_cgatt_get:
+            {
+                on_send_at_cgatt_get();
+                break;
+            }
+            case bc26_message_t::send_at_cesq:
+            {
+                on_send_at_cesq();
+                break;
+            }
             default:
             {
                 break;
@@ -74,6 +99,76 @@ namespace peripheral
 
             // TODO: 根据结果向主模块反馈。
         }
+        /**
+         * @brief 发送 ATE 指令，打开或关闭回显。
+         *
+         * @param is_echo 是否打开回显。
+         */
+        void on_send_ate(bool is_echo) // 参见 bc26_message_t::send_ate。
+        {
+            utils::debug_printf("[-] ATE%d\n", static_cast<int>(is_echo));
+            sender.send_command("ATE" + std::to_string(is_echo) + "\r\n");
+            std::string received_str = receiver.receive_command(300ms);
+            utils::debug_printf("%s", received_str.c_str());
+            utils::debug_printf("[D] ATE%d\n", static_cast<int>(is_echo));
+
+            // TODO: 根据结果向主模块反馈。
+        }
+        /**
+         * @brief 发送 AT+CFUN=<mode> 指令。设置功能模式。
+         *
+         * @param mode 功能模式。
+         */
+        void on_send_at_cfun_set(
+            int mode) // 参见 bc26_message_t::send_at_cfun_set。
+        {
+            utils::debug_printf("[-] AT+CFUN=%d\n", mode);
+            sender.send_command("AT+CFUN=" + std::to_string(mode) + "\r\n");
+            std::string received_str = receiver.receive_command(300ms);
+            utils::debug_printf("%s", received_str.c_str());
+            utils::debug_printf("[D] AT+CFUN=%d\n", mode);
+
+            // TODO: 根据结果向主模块反馈。
+        }
+        /**
+         * @brief 发送 AT+CIMI 指令。查询卡号。
+         */
+        void on_send_at_cimi() // 参见 bc26_message_t::send_at_cimi。
+        {
+            utils::debug_printf("[-] AT+CIMI\n");
+            sender.send_command("AT+CIMI\r\n");
+            std::string received_str = receiver.receive_command(300ms);
+            utils::debug_printf("%s", received_str.c_str());
+            utils::debug_printf("[D] AT+CIMI\n");
+
+            // TODO: 根据结果向主模块反馈。
+        }
+        /**
+         * @brief 发送 AT_CGATT? 指令。查询激活状态。
+         */
+        void on_send_at_cgatt_get() // 参见 bc26_message_t::send_at_cgatt_get。
+        {
+            utils::debug_printf("[-] AT+CGATT?\n");
+            sender.send_command("AT+CGATT?\r\n");
+            std::string received_str = receiver.receive_command(300ms);
+            utils::debug_printf("%s", received_str.c_str());
+            utils::debug_printf("[D] AT+CGATT?\n");
+
+            // TODO: 根据结果向主模块反馈。
+        }
+        /**
+         * @brief 发送 AT+CESQ 指令。获取信号质量。
+         */
+        void on_send_at_cesq() // 参见 bc26_message_t::send_at_cesq。
+        {
+            utils::debug_printf("[-] AT+CESQ\n");
+            sender.send_command("AT+CESQ\r\n");
+            std::string received_str = receiver.receive_command(300ms);
+            utils::debug_printf("%s", received_str.c_str());
+            utils::debug_printf("[D] AT+CESQ\n");
+
+            // TODO: 根据结果向主模块反馈。
+        }
 
         /**
          * @brief 以下函数是主模块的接口，均在主线程中运行。
@@ -88,6 +183,47 @@ namespace peripheral
         {
             push(static_cast<int>(bc26_message_t::send_at),
                  std::make_shared<int>(max_retry));
+        }
+        /**
+         * @brief 向子模块发送消息。发送 ATE<echo> 指令。打开或关闭回显。
+         *
+         * @param is_echo 是否打开回显。默认为不打开。
+         */
+        void send_ate(bool is_echo = false)
+        {
+            push(static_cast<int>(bc26_message_t::send_ate),
+                 std::make_shared<bool>(is_echo));
+        }
+        /**
+         * @brief 向子模块发送消息。发送 AT+CFUN=<mode> 指令。设置功能模式。
+         *
+         * @param mode 功能模式。默认为 1。
+         */
+        void send_at_cfun_set(int mode = 1)
+        {
+            push(static_cast<int>(bc26_message_t::send_at_cfun_set),
+                 std::make_shared<int>(mode));
+        }
+        /**
+         * @brief 向子模块发送消息。发送 AT+CIMI 指令。查询卡号。
+         */
+        void send_at_cimi()
+        {
+            push(static_cast<int>(bc26_message_t::send_at_cimi), nullptr);
+        }
+        /**
+         * @brief 向子模块发送消息。发送 AT_CGATT? 指令。查询激活状态。
+         */
+        void send_at_cgatt_get()
+        {
+            push(static_cast<int>(bc26_message_t::send_at_cgatt_get), nullptr);
+        }
+        /**
+         * @brief 向子模块发送消息。发送 AT+CESQ 指令。获取信号质量。
+         */
+        void send_at_cesq()
+        {
+            push(static_cast<int>(bc26_message_t::send_at_cesq), nullptr);
         }
     };
 } // namespace peripheral
