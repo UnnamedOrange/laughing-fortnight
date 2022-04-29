@@ -19,6 +19,43 @@ namespace peripheral
         null,
         _message_begin = null,
 
+        /**
+         * @brief BC26 模块 send_at 的反馈消息。
+         *
+         * @param bool 是否成功收到 OK。
+         */
+        bc26_send_at,
+        /**
+         * @brief BC26 模块 send_ate 的反馈消息。
+         *
+         * @param bool 是否成功收到 OK。
+         */
+        bc26_send_ate,
+        /**
+         * @brief BC26 模块 send_at_cfun_set 的反馈消息。
+         *
+         * @param bool 是否成功收到 OK。
+         */
+        bc26_send_at_cfun_set,
+        /**
+         * @brief BC26 模块 send_at_cimi 的反馈消息。
+         *
+         * @param bool 是否成功收到 OK。
+         */
+        bc26_send_at_cimi,
+        /**
+         * @brief BC26 模块 send_at_cgatt_get 的反馈消息。
+         *
+         * @param bool 是否成功收到 OK。
+         */
+        bc26_send_at_cgatt_get,
+        /**
+         * @brief BC26 模块 send_at_cesq 的反馈消息。
+         *
+         * @param bool 是否成功收到 OK。
+         */
+        bc26_send_at_cesq,
+
         _message_end,
     };
 } // namespace peripheral

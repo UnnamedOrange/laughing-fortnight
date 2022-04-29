@@ -15,6 +15,8 @@
 
 #include "../command_receiver_serial.hpp"
 #include "../command_sender_serial.hpp"
+#include "../feedback_message.hpp"
+#include "../feedback_message_queue.hpp"
 #include "../global_peripheral.hpp"
 #include "../peripheral_std_framework.hpp"
 #include "bc26_message.hpp"
@@ -23,9 +25,19 @@ namespace peripheral
 {
     class bc26 : public peripheral_std_framework
     {
+    private:
+        using _fmq_t = feedback_message_queue;
+        using _fmq_e_t = feedback_message_enum_t;
+
     protected:
         command_sender_serial sender{serial_bc26};
         command_receiver_serial receiver{serial_bc26};
+        _fmq_t& _external_fmq;
+
+    public:
+        bc26(_fmq_t& fmq) : _external_fmq(fmq)
+        {
+        }
 
         /**
          * @brief 以下函数是子模块的回调函数，均在子线程中运行。
@@ -76,7 +88,8 @@ namespace peripheral
          *
          * @param max_retry 最大重试次数。
          */
-        void on_send_at(int max_retry) // 参见 bc26_message_t::send_at。
+        void on_send_at(int max_retry,
+                        _fmq_t& fmq) // 参见 bc26_message_t::send_at。
         {
             bool is_success = false;
             std::string received_str;
@@ -97,14 +110,21 @@ namespace peripheral
                     utils::debug_printf("[F] AT\n");
             }
 
-            // TODO: 根据结果向主模块反馈。
+            // 参见 feedback_message_enum_t::bc26_send_at。
+            fmq.post_message(_fmq_e_t::bc26_send_at,
+                             std::make_shared<bool>(is_success));
+        }
+        void on_send_at(int max_retry)
+        {
+            on_send_at(max_retry, _external_fmq);
         }
         /**
          * @brief 发送 ATE 指令，打开或关闭回显。
          *
          * @param is_echo 是否打开回显。
          */
-        void on_send_ate(bool is_echo) // 参见 bc26_message_t::send_ate。
+        void on_send_ate(bool is_echo,
+                         _fmq_t& fmq) // 参见 bc26_message_t::send_ate。
         {
             utils::debug_printf("[-] ATE%d\n", static_cast<int>(is_echo));
             sender.send_command("ATE" + std::to_string(is_echo) + "\r\n");
@@ -112,7 +132,14 @@ namespace peripheral
             utils::debug_printf("%s", received_str.c_str());
             utils::debug_printf("[D] ATE%d\n", static_cast<int>(is_echo));
 
-            // TODO: 根据结果向主模块反馈。
+            bool is_success = received_str.find("OK") != std::string::npos;
+            // 参见 feedback_message_enum_t::bc26_send_ate。
+            fmq.post_message(_fmq_e_t::bc26_send_ate,
+                             std::make_shared<bool>(is_success));
+        }
+        void on_send_ate(bool is_echo)
+        {
+            on_send_ate(is_echo, _external_fmq);
         }
         /**
          * @brief 发送 AT+CFUN=<mode> 指令。设置功能模式。
@@ -120,7 +147,8 @@ namespace peripheral
          * @param mode 功能模式。
          */
         void on_send_at_cfun_set(
-            int mode) // 参见 bc26_message_t::send_at_cfun_set。
+            int mode,
+            _fmq_t& fmq) // 参见 bc26_message_t::send_at_cfun_set。
         {
             utils::debug_printf("[-] AT+CFUN=%d\n", mode);
             sender.send_command("AT+CFUN=" + std::to_string(mode) + "\r\n");
@@ -128,12 +156,19 @@ namespace peripheral
             utils::debug_printf("%s", received_str.c_str());
             utils::debug_printf("[D] AT+CFUN=%d\n", mode);
 
-            // TODO: 根据结果向主模块反馈。
+            bool is_success = received_str.find("OK") != std::string::npos;
+            // 参见 feedback_message_enum_t::bc26_send_at_cfun_set。
+            fmq.post_message(_fmq_e_t::bc26_send_at_cfun_set,
+                             std::make_shared<bool>(is_success));
+        }
+        void on_send_at_cfun_set(int mode)
+        {
+            on_send_at_cfun_set(mode, _external_fmq);
         }
         /**
          * @brief 发送 AT+CIMI 指令。查询卡号。
          */
-        void on_send_at_cimi() // 参见 bc26_message_t::send_at_cimi。
+        void on_send_at_cimi(_fmq_t& fmq) // 参见 bc26_message_t::send_at_cimi。
         {
             utils::debug_printf("[-] AT+CIMI\n");
             sender.send_command("AT+CIMI\r\n");
@@ -141,12 +176,21 @@ namespace peripheral
             utils::debug_printf("%s", received_str.c_str());
             utils::debug_printf("[D] AT+CIMI\n");
 
-            // TODO: 根据结果向主模块反馈。
+            // TODO: 解析更多信息。
+            bool is_success = received_str.find("OK") != std::string::npos;
+            // 参见 feedback_message_enum_t::bc26_send_at_cimi。
+            fmq.post_message(_fmq_e_t::bc26_send_at_cimi,
+                             std::make_shared<bool>(is_success));
+        }
+        void on_send_at_cimi()
+        {
+            on_send_at_cimi(_external_fmq);
         }
         /**
          * @brief 发送 AT_CGATT? 指令。查询激活状态。
          */
-        void on_send_at_cgatt_get() // 参见 bc26_message_t::send_at_cgatt_get。
+        void on_send_at_cgatt_get(
+            _fmq_t& fmq) // 参见 bc26_message_t::send_at_cgatt_get。
         {
             utils::debug_printf("[-] AT+CGATT?\n");
             sender.send_command("AT+CGATT?\r\n");
@@ -154,12 +198,20 @@ namespace peripheral
             utils::debug_printf("%s", received_str.c_str());
             utils::debug_printf("[D] AT+CGATT?\n");
 
-            // TODO: 根据结果向主模块反馈。
+            // TODO: 解析更多信息。
+            bool is_success = received_str.find("OK") != std::string::npos;
+            // 参见 feedback_message_enum_t::bc26_send_at_cgatt_get。
+            fmq.post_message(_fmq_e_t::bc26_send_at_cgatt_get,
+                             std::make_shared<bool>(is_success));
+        }
+        void on_send_at_cgatt_get()
+        {
+            on_send_at_cgatt_get(_external_fmq);
         }
         /**
          * @brief 发送 AT+CESQ 指令。获取信号质量。
          */
-        void on_send_at_cesq() // 参见 bc26_message_t::send_at_cesq。
+        void on_send_at_cesq(_fmq_t& fmq) // 参见 bc26_message_t::send_at_cesq。
         {
             utils::debug_printf("[-] AT+CESQ\n");
             sender.send_command("AT+CESQ\r\n");
@@ -167,7 +219,15 @@ namespace peripheral
             utils::debug_printf("%s", received_str.c_str());
             utils::debug_printf("[D] AT+CESQ\n");
 
-            // TODO: 根据结果向主模块反馈。
+            // TODO: 解析更多信息。
+            bool is_success = received_str.find("OK") != std::string::npos;
+            // 参见 feedback_message_enum_t::bc26_send_at_cesq。
+            fmq.post_message(_fmq_e_t::bc26_send_at_cesq,
+                             std::make_shared<bool>(is_success));
+        }
+        void on_send_at_cesq()
+        {
+            on_send_at_cesq(_external_fmq);
         }
 
         /**
