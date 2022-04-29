@@ -271,21 +271,27 @@ namespace peripheral
 
                     on_send_at(10, internal_fmq);
                     msg = internal_fmq.get_message();
+                    assert(msg.first == feedback_message_enum_t::bc26_send_at);
                     if (!*std::static_pointer_cast<bool>(msg.second))
                         break;
 
                     on_send_ate(false, internal_fmq);
                     msg = internal_fmq.get_message();
+                    assert(msg.first == feedback_message_enum_t::bc26_send_ate);
                     if (!*std::static_pointer_cast<bool>(msg.second))
                         break;
 
                     on_send_at_cfun_set(1, internal_fmq);
                     msg = internal_fmq.get_message();
+                    assert(msg.first ==
+                           feedback_message_enum_t::bc26_send_at_cfun_set);
                     if (!*std::static_pointer_cast<bool>(msg.second))
                         break;
 
                     on_send_at_cimi(internal_fmq);
                     msg = internal_fmq.get_message();
+                    assert(msg.first ==
+                           feedback_message_enum_t::bc26_send_at_cimi);
                     {
                         const auto& data = *std::static_pointer_cast<
                             std::tuple<bool, std::string>>(msg.second);
@@ -297,6 +303,8 @@ namespace peripheral
 
                     on_send_at_cgatt_get(internal_fmq);
                     msg = internal_fmq.get_message();
+                    assert(msg.first ==
+                           feedback_message_enum_t::bc26_send_at_cgatt_get);
                     {
                         const auto& data =
                             *std::static_pointer_cast<std::tuple<bool, bool>>(
@@ -309,6 +317,8 @@ namespace peripheral
 
                     on_send_at_cesq(internal_fmq);
                     msg = internal_fmq.get_message();
+                    assert(msg.first ==
+                           feedback_message_enum_t::bc26_send_at_cesq);
                     {
                         const auto& data =
                             *std::static_pointer_cast<std::tuple<bool, int>>(
