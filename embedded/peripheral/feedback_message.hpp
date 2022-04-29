@@ -41,18 +41,21 @@ namespace peripheral
          * @brief BC26 模块 send_at_cimi 的反馈消息。
          *
          * @param bool 是否成功收到 OK。
+         * @param string 卡号。
          */
         bc26_send_at_cimi,
         /**
          * @brief BC26 模块 send_at_cgatt_get 的反馈消息。
          *
          * @param bool 是否成功收到 OK。
+         * @param bool 是否已激活。
          */
         bc26_send_at_cgatt_get,
         /**
          * @brief BC26 模块 send_at_cesq 的反馈消息。
          *
          * @param bool 是否成功收到 OK。
+         * @param int 信号强度。
          */
         bc26_send_at_cesq,
 
@@ -60,6 +63,9 @@ namespace peripheral
          * @brief BC26 模块综合初始化的反馈信息。
          *
          * @param bool 是否初始化成功。
+         * @param string 卡号。
+         * @param bool 是否已激活。
+         * @param int 信号强度。
          */
         bc26_init,
 

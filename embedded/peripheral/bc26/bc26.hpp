@@ -12,6 +12,8 @@
 #include "mbed.h"
 
 #include <chrono>
+#include <string>
+#include <tuple>
 
 #include "../command_receiver_serial.hpp"
 #include "../command_sender_serial.hpp"
@@ -181,11 +183,15 @@ namespace peripheral
             utils::debug_printf("%s", received_str.c_str());
             utils::debug_printf("[D] AT+CIMI\n");
 
-            // TODO: 解析更多信息。
             bool is_success = received_str.find("OK") != std::string::npos;
+            char id[32]{};
+            // 解析失败时，id 应该为全 0。
+            if (is_success && 1 != sscanf(received_str.c_str(), "%s", id))
+                is_success = false;
             // 参见 feedback_message_enum_t::bc26_send_at_cimi。
             fmq.post_message(_fmq_e_t::bc26_send_at_cimi,
-                             std::make_shared<bool>(is_success));
+                             std::make_shared<std::tuple<bool, std::string>>(
+                                 is_success, id));
         }
         void on_send_at_cimi()
         {
@@ -203,11 +209,15 @@ namespace peripheral
             utils::debug_printf("%s", received_str.c_str());
             utils::debug_printf("[D] AT+CGATT?\n");
 
-            // TODO: 解析更多信息。
             bool is_success = received_str.find("OK") != std::string::npos;
+            int is_activated{};
+            if (is_success && 1 != sscanf(received_str.c_str(),
+                                          "\r\n+CGATT: %d", &is_activated))
+                is_success = false;
             // 参见 feedback_message_enum_t::bc26_send_at_cgatt_get。
             fmq.post_message(_fmq_e_t::bc26_send_at_cgatt_get,
-                             std::make_shared<bool>(is_success));
+                             std::make_shared<std::tuple<bool, bool>>(
+                                 is_success, is_activated));
         }
         void on_send_at_cgatt_get()
         {
@@ -224,11 +234,15 @@ namespace peripheral
             utils::debug_printf("%s", received_str.c_str());
             utils::debug_printf("[D] AT+CESQ\n");
 
-            // TODO: 解析更多信息。
             bool is_success = received_str.find("OK") != std::string::npos;
+            int intensity{};
+            if (is_success &&
+                1 != sscanf(received_str.c_str(), "\r\n+CESQ: %d", &intensity))
+                is_success = false;
             // 参见 feedback_message_enum_t::bc26_send_at_cesq。
-            fmq.post_message(_fmq_e_t::bc26_send_at_cesq,
-                             std::make_shared<bool>(is_success));
+            fmq.post_message(
+                _fmq_e_t::bc26_send_at_cesq,
+                std::make_shared<std::tuple<bool, int>>(is_success, intensity));
         }
         void on_send_at_cesq()
         {
@@ -245,6 +259,9 @@ namespace peripheral
             _fmq_t internal_fmq;
             _fmq_t::message_t msg;
             bool any_success = false;
+            std::string card_id;
+            bool is_activated;
+            int intensity;
             for (int i = 0; i < max_retry; i++)
             {
                 bool once_success = false;
@@ -269,18 +286,38 @@ namespace peripheral
 
                     on_send_at_cimi(internal_fmq);
                     msg = internal_fmq.get_message();
-                    if (!*std::static_pointer_cast<bool>(msg.second))
-                        break;
+                    {
+                        const auto& data = *std::static_pointer_cast<
+                            std::tuple<bool, std::string>>(msg.second);
+
+                        if (!std::get<0>(data))
+                            break;
+                        card_id = std::get<1>(data);
+                    }
 
                     on_send_at_cgatt_get(internal_fmq);
                     msg = internal_fmq.get_message();
-                    if (!*std::static_pointer_cast<bool>(msg.second))
-                        break;
+                    {
+                        const auto& data =
+                            *std::static_pointer_cast<std::tuple<bool, bool>>(
+                                msg.second);
+
+                        if (!std::get<0>(data))
+                            break;
+                        is_activated = std::get<1>(data);
+                    }
 
                     on_send_at_cesq(internal_fmq);
                     msg = internal_fmq.get_message();
-                    if (!*std::static_pointer_cast<bool>(msg.second))
-                        break;
+                    {
+                        const auto& data =
+                            *std::static_pointer_cast<std::tuple<bool, int>>(
+                                msg.second);
+
+                        if (!std::get<0>(data))
+                            break;
+                        intensity = std::get<1>(data);
+                    }
 
                     once_success = true;
                 } while (false);
@@ -291,8 +328,10 @@ namespace peripheral
                 }
             }
 
-            fmq.post_message(_fmq_e_t::bc26_init,
-                             std::make_shared<bool>(any_success));
+            fmq.post_message(
+                _fmq_e_t::bc26_init,
+                std::make_shared<std::tuple<bool, std::string, bool, int>>(
+                    any_success, card_id, is_activated, intensity));
         }
         void on_init(int max_retry)
         {
