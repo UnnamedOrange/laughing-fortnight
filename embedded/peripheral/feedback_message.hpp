@@ -56,6 +56,13 @@ namespace peripheral
          */
         bc26_send_at_cesq,
 
+        /**
+         * @brief BC26 模块综合初始化的反馈信息。
+         *
+         * @param bool 是否初始化成功。
+         */
+        bc26_init,
+
         _message_end,
     };
 } // namespace peripheral

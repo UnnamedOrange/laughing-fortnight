@@ -77,6 +77,11 @@ namespace peripheral
                 on_send_at_cesq();
                 break;
             }
+            case bc26_message_t::init:
+            {
+                on_init(*std::static_pointer_cast<int>(data));
+                break;
+            }
             default:
             {
                 break;
@@ -231,6 +236,70 @@ namespace peripheral
         }
 
         /**
+         * @brief 综合地初始化。
+         *
+         * @param max_retry 最大重试次数。
+         */
+        void on_init(int max_retry, _fmq_t& fmq)
+        {
+            _fmq_t internal_fmq;
+            _fmq_t::message_t msg;
+            bool any_success = false;
+            for (int i = 0; i < max_retry; i++)
+            {
+                bool once_success = false;
+                do
+                {
+                    using namespace std::literals;
+
+                    on_send_at(10, internal_fmq);
+                    msg = internal_fmq.get_message();
+                    if (!*std::static_pointer_cast<bool>(msg.second))
+                        break;
+
+                    on_send_ate(false, internal_fmq);
+                    msg = internal_fmq.get_message();
+                    if (!*std::static_pointer_cast<bool>(msg.second))
+                        break;
+
+                    on_send_at_cfun_set(1, internal_fmq);
+                    msg = internal_fmq.get_message();
+                    if (!*std::static_pointer_cast<bool>(msg.second))
+                        break;
+
+                    on_send_at_cimi(internal_fmq);
+                    msg = internal_fmq.get_message();
+                    if (!*std::static_pointer_cast<bool>(msg.second))
+                        break;
+
+                    on_send_at_cgatt_get(internal_fmq);
+                    msg = internal_fmq.get_message();
+                    if (!*std::static_pointer_cast<bool>(msg.second))
+                        break;
+
+                    on_send_at_cesq(internal_fmq);
+                    msg = internal_fmq.get_message();
+                    if (!*std::static_pointer_cast<bool>(msg.second))
+                        break;
+
+                    once_success = true;
+                } while (false);
+                if (once_success)
+                {
+                    any_success = true;
+                    break;
+                }
+            }
+
+            fmq.post_message(_fmq_e_t::bc26_init,
+                             std::make_shared<bool>(any_success));
+        }
+        void on_init(int max_retry)
+        {
+            on_init(max_retry, _external_fmq);
+        }
+
+        /**
          * @brief 以下函数是主模块的接口，均在主线程中运行。
          */
     public:
@@ -284,6 +353,17 @@ namespace peripheral
         void send_at_cesq()
         {
             push(static_cast<int>(bc26_message_t::send_at_cesq), nullptr);
+        }
+
+        /**
+         * @brief 综合地初始化。
+         *
+         * @param max_retry 最大重试次数。
+         */
+        void init(int max_retry = 3)
+        {
+            push(static_cast<int>(bc26_message_t::init),
+                 std::make_shared<int>(max_retry));
         }
     };
 } // namespace peripheral

@@ -46,6 +46,13 @@ namespace peripheral
          */
         send_at_cesq,
 
+        /**
+         * @brief 综合地初始化。
+         *
+         * @param int 最大重试次数。
+         */
+        init,
+
         _message_end,
         /**
          * @brief 被定义的消息的总数。
