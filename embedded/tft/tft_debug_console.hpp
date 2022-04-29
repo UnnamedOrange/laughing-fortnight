@@ -471,44 +471,54 @@ namespace modules
                 buffer.clear();
                 buffer.push_back("");
             }
-            void print(std::string_view str)
+            void print(std::string_view str, bool recursive_print = false)
             {
-                updated = true;
-                if (str == "Done\n" || str == "Fail\n")
+                for (char ch : str)
                 {
-                    bool flag = false;
-                    for (auto it = buffer.rbegin(); it != buffer.rend(); it++)
+                    if (ch == '\r')
+                        continue;
+                    else if (ch == '\n')
+                        buffer.push_back("");
+                    else
+                        buffer.back().push_back(ch);
+                }
+                if (recursive_print)
+                    return;
+                for (auto it = buffer.begin(); it != buffer.end(); it++)
+                {
+                    if ((*it).substr(0, 3) == "[D]" ||
+                        (*it).substr(0, 3) == "[F]")
                     {
-                        if ((*it).substr(0, 3) == "[-]" ||
-                            (*it).substr(0, 3) == "[\\]" ||
-                            (*it).substr(0, 3) == "[|]" ||
-                            (*it).substr(0, 3) == "[/]")
+                        bool flag = false;
+                        for (auto& line_to_modify : buffer)
                         {
-                            if (str == "Done\n")
-                                (*it)[1] = '*';
-                            else // Fail
-                                (*it)[1] = 'x';
-                            flag = true;
-                            break;
+                            if (line_to_modify.substr(0, 3) == "[-]" ||
+                                line_to_modify.substr(0, 3) == "[\\]" ||
+                                line_to_modify.substr(0, 3) == "[|]" ||
+                                line_to_modify.substr(0, 3) == "[/]")
+                            {
+                                if ((*it).substr(3) != line_to_modify.substr(3))
+                                    continue;
+
+                                if ((*it).substr(0, 3) == "[D]")
+                                    line_to_modify[1] = '*';
+                                else // Fail
+                                    line_to_modify[1] = 'x';
+                                flag = true;
+                                break;
+                            }
+                        }
+                        if (flag)
+                            it = buffer.erase(it);
+                        else
+                        {
+                            // print("[E] No matched task.\n", true);
                         }
                     }
-                    if (!flag)
-                        print("[E] No matched task.\n");
                 }
-                else
-                {
-                    for (char ch : str)
-                    {
-                        if (ch == '\r')
-                            continue;
-                        else if (ch == '\n')
-                            buffer.push_back("");
-                        else
-                            buffer.back().push_back(ch);
-                    }
-                    while (buffer.size() > max_n_line)
-                        buffer.pop_front();
-                }
+                while (buffer.size() > max_n_line)
+                    buffer.pop_front();
+                updated = true;
             }
             bool has_updated() const
             {
