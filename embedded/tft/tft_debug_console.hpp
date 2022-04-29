@@ -511,7 +511,9 @@ namespace modules
                         if (flag)
                             it = buffer.erase(it);
                         else
-                            print("[E] No matched task.\n", true);
+                        {
+                            // print("[E] No matched task.\n", true);
+                        }
                     }
                 }
                 while (buffer.size() > max_n_line)
