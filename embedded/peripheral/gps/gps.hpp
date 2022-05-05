@@ -33,6 +33,7 @@ namespace peripheral
         using _fmq_e_t = feedback_message_enum_t;
 
     protected:
+        mbed::BufferedSerial serial_gps{PIN_GPS_TX, PIN_GPS_RX};
         command_sender_serial sender{serial_gps};
         command_receiver_serial receiver{serial_gps};
         _fmq_t& _external_fmq;

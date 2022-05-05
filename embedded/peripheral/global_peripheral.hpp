@@ -1,10 +1,7 @@
 /**
  * @file global_peripheral.hpp
  * @author UnnamedOrange
- * @brief 外设接口全局变量。由于某些接口必须指定双工工作模式，
- * 所以需要定义接口全局变量。修改以下常量：
- * - @ref PIN_BC26_TX
- * - @ref PIN_BC26_RX
+ * @brief 外设接口管脚定义。
  *
  * @copyright Copyright (c) UnnamedOrange. Licensed under the MIT License.
  * See the LICENSE file in the repository root for full license text.
@@ -48,7 +45,37 @@ inline constexpr PinName PIN_GPS_TX = USBTX;
  * @todo 使用设计的管脚。
  */
 inline constexpr PinName PIN_BC26_RX = USBRX;
+/**
+ * @brief 加速度计的 MOSI 管脚。
+ *
+ * @note 在具体硬件上修改该常量。
+ *
+ * @todo 使用设计的管脚。
+ */
+inline constexpr PinName PIN_ACCEL_MOSI = NC;
+/**
+ * @brief 加速度计的 MISO 管脚。
+ *
+ * @note 在具体硬件上修改该常量。
+ *
+ * @todo 使用设计的管脚。
+ */
+inline constexpr PinName PIN_ACCEL_MISO = NC;
+/**
+ * @brief 加速度计的 SCLK 管脚。
+ *
+ * @note 在具体硬件上修改该常量。
+ *
+ * @todo 使用设计的管脚。
+ */
+inline constexpr PinName PIN_ACCEL_SCLK = NC;
+/**
+ * @brief 加速度计的 CS 管脚。
+ *
+ * @note 在具体硬件上修改该常量。
+ *
+ * @todo 使用设计的管脚。
+ */
+inline constexpr PinName PIN_ACCEL_CS = NC;
 
-inline mbed::BufferedSerial serial_bc26{PIN_BC26_TX, PIN_BC26_RX};
-inline mbed::BufferedSerial serial_gps{PIN_GPS_TX, PIN_GPS_RX};
 #pragma GCC diagnostic pop

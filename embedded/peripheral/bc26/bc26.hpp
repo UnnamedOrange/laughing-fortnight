@@ -32,6 +32,7 @@ namespace peripheral
         using _fmq_e_t = feedback_message_enum_t;
 
     protected:
+        mbed::BufferedSerial serial_bc26{PIN_BC26_TX, PIN_BC26_RX};
         command_sender_serial sender{serial_bc26};
         command_receiver_serial receiver{serial_bc26};
         _fmq_t& _external_fmq;
