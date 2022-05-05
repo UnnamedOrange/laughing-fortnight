@@ -35,8 +35,8 @@ namespace peripheral
         /**
          * @brief 通用的线程主函数，在其中调用纯虚函数 thread_main。
          * @note
-         * 调用纯虚函数时，子类的构造函数必须已经执行完毕，因此应当有一个等待过程。
-         * 主函数应当主动调用 start 函数以开始执行 thread_main。
+         * 调用纯虚函数时，父类的构造函数必须已经执行完毕，因此应当有一个等待过程。
+         * 调用 start 函数以开始执行 thread_main。
          */
         void _fake_thread_main()
         {
@@ -59,15 +59,19 @@ namespace peripheral
         /**
          * @brief 析构函数将在主线程中调用。
          *
-         * @note 子类被析构时，必须想办法令 thread_main 正常退出。
-         * 此析构函数会令线程对象 join。
-         *
-         * @note 必须先调用 start 函数再析构。
+         * @note 子类被析构时，必须想办法令 thread_main 正常退出，
+         * 且已 join。
          */
         virtual ~peripheral_thread()
         {
-            _thread.join();
-            utils::debug_printf("[I] Thread joined.\n");
+            // 如果线程不处于未运行的状态，则报错。
+            if (_thread.get_state() != rtos::Thread::State::Deleted)
+            {
+                using namespace std::literals;
+                utils::debug_printf("[E] Join missing!\n");
+                rtos::ThisThread::sleep_for(1s);
+                error("[E] Join missing!");
+            }
         }
 
     protected:
@@ -78,12 +82,20 @@ namespace peripheral
          * @note 子类被析构时，必须想办法令 thread_main 正常退出。
          */
         virtual void thread_main() = 0;
+        /**
+         * @brief 令线程对象 join。
+         *
+         * @note 如果线程已经 start，则必须在子类的析构函数中调用该函数。
+         */
+        void join()
+        {
+            _thread.join();
+            utils::debug_printf("[I] Thread joined.\n");
+        }
 
     public:
         /**
-         * @brief 子类的构造函数执行完毕后，在主线程调用此函数以开始执行
-         * thread_main。
-         * @note 不能在子类的构造函数中调用该函数。
+         * @brief 调用此函数以开始执行 thread_main。
          */
         void start()
         {

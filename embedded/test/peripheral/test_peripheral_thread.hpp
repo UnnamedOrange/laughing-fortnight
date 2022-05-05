@@ -31,20 +31,25 @@ namespace test
                 utils::debug_printf("[I] thread_main starts.\n");
                 // 子线程立即结束。
             }
+
+        public:
+            ~_fake_peripheral()
+            {
+                peripheral_thread::join();
+            }
         };
         _fake_peripheral _fp;
 
     public:
         test_peripheral_thread()
         {
+            using namespace std::literals;
             utils::debug_printf("\n");
             utils::debug_printf("[I] peripheral_thread test.\n");
             utils::debug_printf("[I] OK if info occurs.\n");
-            // 延迟五秒，期望五秒后看到子线程开始的信息。
-            rtos::ThisThread::sleep_for(5s);
-            _fp.start();
-            // 主线程等待，确保子线程的输出语句能够执行。
+            // 延迟一秒，期望一秒后看到子线程开始的信息。
             rtos::ThisThread::sleep_for(1s);
+            _fp.start();
             // 不是死循环，主模块立即被销毁，期望看到子线程 join。
         }
     };
