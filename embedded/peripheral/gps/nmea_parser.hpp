@@ -60,7 +60,6 @@ namespace peripheral
                 if (_should_exit)
                     break;
                 // 非阻塞地读取串口，以保证线程可正常退出。
-                // TODO: 测试缓冲区大小是否足够。
                 std::string read_str = _receiver.receive_command(10ms);
                 for (char ch : read_str)
                 {
