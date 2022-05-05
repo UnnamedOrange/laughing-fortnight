@@ -22,6 +22,7 @@
 #include "../global_peripheral.hpp"
 #include "../peripheral_std_framework.hpp"
 #include "gps_message.hpp"
+#include "nmea_parser.hpp"
 
 namespace peripheral
 {
@@ -35,6 +36,9 @@ namespace peripheral
         command_sender_serial sender{serial_gps};
         command_receiver_serial receiver{serial_gps};
         _fmq_t& _external_fmq;
+
+    private:
+        nmea_parser parser{receiver};
 
     public:
         gps(_fmq_t& fmq) : _external_fmq(fmq)
@@ -60,5 +64,32 @@ namespace peripheral
          * @brief 以下函数是主模块的接口，均在主线程中运行。
          */
     public:
+        /**
+         * @brief 获取当前的位置信息。
+         *
+         * @note 该函数是线程安全的。
+         *
+         * @note 该函数不涉及 GPS 模块的消息队列。
+         *
+         * @return nmea_parser::position_t
+         */
+        nmea_parser::position_t get_current_position()
+        {
+            return parser.get_current_position();
+        }
+
+        /**
+         * @brief 获取最后一次有效的位置信息。
+         *
+         * @note 该函数是线程安全的。
+         *
+         * @note 该函数不涉及 GPS 模块的消息队列。
+         *
+         * @return nmea_parser::position_t
+         */
+        nmea_parser::position_t get_last_valid_position()
+        {
+            return parser.get_last_valid_position();
+        }
     };
 } // namespace peripheral
