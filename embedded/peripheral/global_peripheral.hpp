@@ -31,7 +31,24 @@ inline constexpr PinName PIN_BC26_TX = USBTX;
  *
  * @todo 使用设计的管脚。
  */
+inline constexpr PinName PIN_GPS_RX = USBRX;
+/**
+ * @brief GPS 的 TX（CPU 端）管脚。
+ *
+ * @note 在具体硬件上修改该常量。
+ *
+ * @todo 使用设计的管脚。
+ */
+inline constexpr PinName PIN_GPS_TX = USBTX;
+/**
+ * @brief GPS 的 RX（CPU 端）管脚。
+ *
+ * @note 在具体硬件上修改该常量。
+ *
+ * @todo 使用设计的管脚。
+ */
 inline constexpr PinName PIN_BC26_RX = USBRX;
 
 inline mbed::BufferedSerial serial_bc26{PIN_BC26_TX, PIN_BC26_RX};
+inline mbed::BufferedSerial serial_gps{PIN_GPS_TX, PIN_GPS_RX};
 #pragma GCC diagnostic pop
