@@ -119,5 +119,15 @@ namespace peripheral
             _cond_queue.notify_one();
             // ScopedMutexLock 析构函数自动释放锁。
         }
+        /**
+         * @brief 消息队列是否为空。
+         *
+         * @note 该函数是线程安全的。
+         */
+        bool empty()
+        {
+            rtos::ScopedMutexLock lock(_mutex_queue);
+            return _queue.empty();
+        }
     };
 } // namespace peripheral
