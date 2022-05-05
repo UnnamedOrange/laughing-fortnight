@@ -19,6 +19,7 @@
 #include <vector>
 
 #include "../command_receiver_serial.hpp"
+#include "../peripheral_thread.hpp"
 
 namespace peripheral
 {
@@ -27,24 +28,40 @@ namespace peripheral
      *
      * @note 接收到新的位置后不会进行通知。
      */
-    class nmea_parser
+    class nmea_parser : public peripheral_thread
     {
     private:
         command_receiver_serial& _receiver;
 
     private:
-        rtos::Thread _thread;
+        bool _should_exit{};
+
+    public:
+        nmea_parser(command_receiver_serial& receiver) : _receiver(receiver)
+        {
+            peripheral_thread::start();
+        }
+        ~nmea_parser()
+        {
+            _should_exit = true;
+            peripheral_thread::join();
+        }
 
     private:
         /**
          * @brief 不断读取串口信息的线程函数。
          */
-        void receiver_thread_routine()
+        void thread_main() override
         {
             std::string buf;
             while (true)
             {
-                std::string read_str = _receiver.receive_command();
+                using namespace std::literals;
+                if (_should_exit)
+                    break;
+                // 非阻塞地读取串口，以保证线程可正常退出。
+                // TODO: 测试缓冲区大小是否足够。
+                std::string read_str = _receiver.receive_command(10ms);
                 for (char ch : read_str)
                 {
                     buf.push_back(ch);
@@ -63,13 +80,6 @@ namespace peripheral
                     }
                 }
             }
-        }
-
-    public:
-        nmea_parser(command_receiver_serial& receiver) : _receiver(receiver)
-        {
-            _thread.start(
-                std::bind(&nmea_parser::receiver_thread_routine, this));
         }
 
     private:
