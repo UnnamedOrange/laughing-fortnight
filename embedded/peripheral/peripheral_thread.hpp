@@ -28,15 +28,15 @@ namespace peripheral
          */
         rtos::Thread _thread;
         /**
-         * @brief 用于 @ref start 的二元信号量。
-         * @note 初始状态为 0，调用 @ref start 后会释放为 1。
+         * @brief 用于 start 的二元信号量。
+         * @note 初始状态为 0，调用 start 后会释放为 1。
          */
         rtos::Semaphore _sem_start{0, 1};
         /**
-         * @brief 通用的线程主函数，在其中调用纯虚函数 @ref thread_main。
+         * @brief 通用的线程主函数，在其中调用纯虚函数 thread_main。
          * @note
          * 调用纯虚函数时，子类的构造函数必须已经执行完毕，因此应当有一个等待过程。
-         * 主函数应当主动调用 @ref start 函数以开始执行 @ref thread_main。
+         * 主函数应当主动调用 start 函数以开始执行 thread_main。
          */
         void _fake_thread_main()
         {
@@ -58,32 +58,36 @@ namespace peripheral
         }
         /**
          * @brief 析构函数将在主线程中调用。
-         * @note 假设主模块是一个死循环，则外设线程永不终止，
-         * 因此析构函数只是为了配对开始线程。
+         *
+         * @note 子类被析构时，必须想办法令 thread_main 正常退出。
+         * 此析构函数会令线程对象 join。
+         *
+         * @note 必须先调用 start 函数再析构。
          */
         virtual ~peripheral_thread()
         {
-            // 假设该过程在正常情况下总是不会发生。
-            _thread.terminate();
-            utils::debug_printf("[W] Thread terminated unexpectedly.\n");
+            _thread.join();
+            utils::debug_printf("[I] Thread joined.\n");
         }
 
     protected:
         /**
          * @brief 待实现的纯虚函数，表示线程主函数。
-         * @see 调用 @ref start 函数以真正开始执行。
+         * 调用 start 函数以真正开始执行。
+         *
+         * @note 子类被析构时，必须想办法令 thread_main 正常退出。
          */
         virtual void thread_main() = 0;
 
     public:
         /**
-         * @brief 子类的构造函数执行完毕后，在主线程调用此函数以开始执行 @ref
+         * @brief 子类的构造函数执行完毕后，在主线程调用此函数以开始执行
          * thread_main。
          * @note 不能在子类的构造函数中调用该函数。
          */
         void start()
         {
-            // 令信号量加一，使 @ref _fake_thread_main 跳过阻塞，
+            // 令信号量加一，使 _fake_thread_main 跳过阻塞，
             // 以开始执行真正的线程主函数。
             _sem_start.release();
         }
