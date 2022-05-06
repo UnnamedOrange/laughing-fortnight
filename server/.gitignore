@@ -156,4 +156,4 @@ cython_debug/
 .vscode/
 
 # data for tests
-# data/
+data/
