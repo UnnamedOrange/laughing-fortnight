@@ -33,16 +33,12 @@ inline constexpr PinName PIN_BC26_RX = PA_3;
  * @brief GPS 的 TX（CPU 端）管脚。
  *
  * @note 在具体硬件上修改该常量。
- *
- * @todo 检查设计的管脚。
  */
 inline constexpr PinName PIN_GPS_TX = PC_4;
 /**
  * @brief GPS 的 RX（CPU 端）管脚。
  *
  * @note 在具体硬件上修改该常量。
- *
- * @todo 检查设计的管脚。
  */
 inline constexpr PinName PIN_GPS_RX = PC_5;
 /**
