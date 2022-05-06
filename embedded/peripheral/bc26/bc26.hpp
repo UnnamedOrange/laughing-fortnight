@@ -42,9 +42,7 @@ namespace peripheral
         {
         }
 
-        /**
-         * @brief 以下函数是子模块的回调函数，均在子线程中运行。
-         */
+        // 以下函数是子模块的回调函数，均在子线程中运行。
     private:
         void on_message(int id, std::shared_ptr<void> data) override
         {
@@ -349,9 +347,7 @@ namespace peripheral
             on_init(max_retry, _external_fmq);
         }
 
-        /**
-         * @brief 以下函数是主模块的接口，均在主线程中运行。
-         */
+        // 以下函数是主模块的接口，均在主线程中运行。
     public:
         /**
          * @brief 向子模块发送消息。重复发送 AT 指令，直到收到 OK。
