@@ -11,6 +11,7 @@
 
 #include "mbed.h"
 
+#include "../command_spi.hpp"
 #include "../feedback_message.hpp"
 #include "../feedback_message_queue.hpp"
 #include "../global_peripheral.hpp"
@@ -25,9 +26,12 @@ namespace peripheral
         using _fmq_t = feedback_message_queue;
         using _fmq_e_t = feedback_message_enum_t;
 
-    protected:
+    private:
         mbed::SPI spi_accel{PIN_ACCEL_MOSI, PIN_ACCEL_MISO, PIN_ACCEL_SCLK};
         mbed::DigitalOut cs_accel{PIN_ACCEL_CS};
+
+    protected:
+        command_spi<> sender{spi_accel, cs_accel}; // 使用默认模板参数。
         _fmq_t& _external_fmq;
 
     public:
