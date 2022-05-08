@@ -42,6 +42,7 @@ namespace peripheral
     public:
         command_spi(mbed::SPI& spi, mbed::DigitalOut& cs) : _spi(spi), _cs(cs)
         {
+            _cs = 1;
             _spi.format(bits, mode);
             _spi.frequency(frequency);
         }
