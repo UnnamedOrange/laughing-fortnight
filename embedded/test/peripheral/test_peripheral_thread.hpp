@@ -20,8 +20,7 @@ namespace test
     /**
      * @brief 测试 peripheral_thread。
      * - 测试子线程是否能在主线程中受控延迟启动。
-     * - 期望主线程是一个死循环，主模块及其里面的子模块永不被销毁。
-     *   测试在子模块被销毁时，是否正常报错。
+     * - 测试子模块被销毁时，是否正常 join。
      */
     class test_peripheral_thread
     {
@@ -32,23 +31,26 @@ namespace test
                 utils::debug_printf("[I] thread_main starts.\n");
                 // 子线程立即结束。
             }
+
+        public:
+            ~_fake_peripheral()
+            {
+                peripheral_thread::join();
+            }
         };
         _fake_peripheral _fp;
 
     public:
         test_peripheral_thread()
         {
+            using namespace std::literals;
             utils::debug_printf("\n");
-            utils::debug_printf(
-                "[I] Test for peripheral_thread starts 1 second later.\n");
-            utils::debug_printf(
-                "[I] An info and a warning expected 5 seconds later.\n");
-            // 延迟五秒，期望五秒后看到子线程开始的信息。
-            rtos::ThisThread::sleep_for(5s);
-            _fp.start();
-            // 主线程等待，确保子线程的输出语句能够执行。
+            utils::debug_printf("[I] peripheral_thread test.\n");
+            utils::debug_printf("[I] OK if info occurs.\n");
+            // 延迟一秒，期望一秒后看到子线程开始的信息。
             rtos::ThisThread::sleep_for(1s);
-            // 不是死循环，主模块立即被销毁，期望看到报错。
+            _fp.start();
+            // 不是死循环，主模块立即被销毁，期望看到子线程 join。
         }
     };
 } // namespace test

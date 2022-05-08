@@ -40,23 +40,24 @@ namespace peripheral
          */
         std::queue<std::pair<int, std::shared_ptr<void>>> _queue;
         /**
-         * @brief 子线程是否需要退出。实际上不可能退出，仅在测试时使用。
+         * @brief 子线程是否需要退出。
          */
         bool _should_exit{};
 
     public:
+        peripheral_std_framework()
+        {
+            peripheral_thread::start();
+        }
         ~peripheral_std_framework()
         {
-            // 实际使用中该析构函数不会被执行，仅为了让测试正常进行。
-
             // 通知子线程退出。
             {
                 rtos::ScopedMutexLock lock(_mutex_queue);
                 _should_exit = true;
                 _cond_queue.notify_one();
             }
-            // 等待 1s，确保子线程退出。
-            rtos::ThisThread::sleep_for(1s);
+           peripheral_thread::join();
         }
 
     private:
@@ -118,6 +119,16 @@ namespace peripheral
             // 发送信号。
             _cond_queue.notify_one();
             // ScopedMutexLock 析构函数自动释放锁。
+        }
+        /**
+         * @brief 消息队列是否为空。
+         *
+         * @note 该函数是线程安全的。
+         */
+        bool empty()
+        {
+            rtos::ScopedMutexLock lock(_mutex_queue);
+            return _queue.empty();
         }
     };
 } // namespace peripheral
