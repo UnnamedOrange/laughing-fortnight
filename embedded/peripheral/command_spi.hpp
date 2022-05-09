@@ -26,8 +26,6 @@ namespace peripheral
      *
      * @note 这个类是线程安全的。
      *
-     * @todo 确认位宽应该选取为 8。
-     *
      * @tparam frequency SPI 的频率。默认为 1 MHz。
      * @tparam bits SPI 的位宽。默认为 8。
      * @tparam mode SPI 的工作模式。默认为 3。
@@ -80,8 +78,6 @@ namespace peripheral
          * @brief 使用 SPI 阻塞地发送并接收一个字节流。
          *
          * @note 这个函数是线程安全的。
-         *
-         * @todo 确认得到的数据是期望的。
          *
          * @param data 要发送的字节流。
          * @return std::string 接收到的字节流。长度与发送的字节流相等。
