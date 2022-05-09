@@ -15,6 +15,11 @@ namespace peripheral
     {
         _message_begin,
 
+        /**
+         * @brief 初始化。
+         */
+        init,
+
         _message_end,
         /**
          * @brief 被定义的消息的总数。

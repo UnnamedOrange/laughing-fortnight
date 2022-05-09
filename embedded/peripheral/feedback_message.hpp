@@ -69,6 +69,13 @@ namespace peripheral
          */
         bc26_init,
 
+        /**
+         * @brief 加速度计初始化的反馈信息。
+         *
+         * @param bool 是否初始化成功。
+         */
+        accel_init,
+
         _message_end,
     };
 } // namespace peripheral
