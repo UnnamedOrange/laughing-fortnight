@@ -22,6 +22,7 @@
 #include "../global_peripheral.hpp"
 #include "../peripheral_std_framework.hpp"
 #include "bc26_message.hpp"
+#include <utils/debug.hpp>
 
 namespace peripheral
 {
