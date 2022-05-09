@@ -22,6 +22,17 @@ namespace peripheral
     class adxl345_middleware : public adxl345_interface
     {
     public:
+        adxl345_middleware()
+        {
+            software_reset();
+        }
+        ~adxl345_middleware()
+        {
+            reset_int1();
+            reset_int2();
+        }
+
+    public:
         /**
          * @brief 读器件 ID。器件 ID 为 0xE5 说明模块状态和时序基本正常。
          *
@@ -40,6 +51,20 @@ namespace peripheral
         bool check_devid()
         {
             return read_devid() == 0xE5;
+        }
+
+        /**
+         * @brief 软件重置 ADXL345。
+         *
+         * @note 软件重置 ADXL345 是未在文档中公开的方法，
+         * 需要用到保留的地址 RESERVED1。
+         *
+         * @todo 验证软件重置是否可用。
+         */
+        void software_reset()
+        {
+            // 向 RESERVED1 寄存器写 0x52 可以软件重置。
+            write(adxl345_address::RESERVED1, {0x52});
         }
     };
 } // namespace peripheral
