@@ -17,6 +17,7 @@
 #include "../global_peripheral.hpp"
 #include "../peripheral_std_framework.hpp"
 #include "accel_message.hpp"
+#include "adxl345_middleware.hpp"
 
 namespace peripheral
 {
@@ -26,12 +27,8 @@ namespace peripheral
         using _fmq_t = feedback_message_queue;
         using _fmq_e_t = feedback_message_enum_t;
 
-    private:
-        mbed::SPI spi_accel{PIN_ACCEL_MOSI, PIN_ACCEL_MISO, PIN_ACCEL_SCLK};
-        mbed::DigitalOut cs_accel{PIN_ACCEL_CS};
-
     protected:
-        command_spi<> sender{spi_accel, cs_accel}; // 使用默认模板参数。
+        adxl345_middleware adxl345;
         _fmq_t& _external_fmq;
 
     public:
