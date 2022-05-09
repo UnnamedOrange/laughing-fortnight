@@ -93,8 +93,6 @@ namespace peripheral
 
         /**
          * @brief 读加速度寄存器。
-         *
-         * @todo 检查获取的数据格式是否正确。
          */
         accel_data_t get_accel()
         {
