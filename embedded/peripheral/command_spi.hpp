@@ -59,16 +59,53 @@ namespace peripheral
 
     public:
         /**
-         * @brief 使用 SPI 发送并接收一个数据。数据的宽度取决于 bits。
+         * @brief 数据宽度为 bits 的有符号整数类型。
+         */
+        using bits_t = std::conditional_t<
+            bits == 8, char,
+            std::conditional_t<bits == 16, int16_t,
+                               std::conditional_t<bits == 32, int32_t, void>>>;
+
+    public:
+        /**
+         * @brief 使用 SPI 发送并接收一个数据。
+         * 可发送的数据的宽度取决于 bits。
          *
          * @param data 要发送的数据。
-         * @return int 接收到的数据。
+         * @return bits_t 接收到的数据。
          */
-        int write(int data)
+        bits_t write(char data)
         {
-            static_assert(sizeof(int) * 8 >= bits, "int is not large enough.");
             _select();
-            int ret = _spi.write(data);
+            bits_t ret = _spi.write(data);
+            _deselect();
+            return ret;
+        }
+        /**
+         * @brief 使用 SPI 发送并接收一个数据。
+         * 可发送的数据的宽度取决于 bits。
+         *
+         * @param data 要发送的数据。
+         * @return bits_t 接收到的数据。
+         */
+        bits_t write(int16_t data)
+        {
+            _select();
+            bits_t ret = _spi.write(data);
+            _deselect();
+            return ret;
+        }
+        /**
+         * @brief 使用 SPI 发送并接收一个数据。
+         * 可发送的数据的宽度取决于 bits。
+         *
+         * @param data 要发送的数据。
+         * @return bits_t 接收到的数据。
+         */
+        bits_t write(int32_t data)
+        {
+            _select();
+            bits_t ret = _spi.write(data);
             _deselect();
             return ret;
         }
