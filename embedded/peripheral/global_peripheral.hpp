@@ -56,8 +56,6 @@ inline constexpr PinName PIN_ACCEL_SCLK = PA_5;
 inline constexpr PinName PIN_ACCEL_CS = PC_11;
 /**
  * @brief 加速度计的中断 1 管脚。
- *
- * @todo 检查设计的管脚。
  */
 inline constexpr PinName PIN_ACCEL_INT1 = PC_10;
 /**
