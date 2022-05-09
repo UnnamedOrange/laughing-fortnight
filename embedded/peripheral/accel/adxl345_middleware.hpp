@@ -40,7 +40,7 @@ namespace peripheral
          *
          * @return char 器件 ID。
          */
-        char read_devid()
+        char get_devid()
         {
             return read(adxl345_address::DEVID);
         }
@@ -50,7 +50,7 @@ namespace peripheral
          */
         bool check_devid()
         {
-            return read_devid() == 0xE5;
+            return get_devid() == 0xE5;
         }
 
         /**
@@ -64,7 +64,7 @@ namespace peripheral
         void software_reset()
         {
             // 向 RESERVED1 寄存器写 0x52 可以软件重置。
-            write(adxl345_address::RESERVED1, {0x52});
+            write(adxl345_address::RESERVED1, 0x52);
         }
     };
 } // namespace peripheral
