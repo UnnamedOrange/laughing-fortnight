@@ -39,13 +39,11 @@ namespace peripheral
          * @brief 写 ADXL345 寄存器。
          *
          * @param addr 写入的地址。
-         * @param native_array 以数组形式组织的待写入数据。
+         * @param byte 待写入的数据。
          */
-        template <size_t size>
-        void write(char addr, const char (&native_array)[size])
+        void write(char addr, char byte)
         {
-            std::array<char, size + 1> data{addr};
-            std::copy(native_array, native_array + size, data.begin() + 1);
+            std::array<char, 2> data{addr, byte};
             spi.write(data);
         }
         /**
