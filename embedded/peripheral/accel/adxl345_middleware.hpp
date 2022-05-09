@@ -84,8 +84,6 @@ namespace peripheral
          *
          * @note 软件重置 ADXL345 是未在文档中公开的方法，
          * 需要用到保留的地址 RESERVED1。
-         *
-         * @todo 验证软件重置是否可用。
          */
         void software_reset()
         {
