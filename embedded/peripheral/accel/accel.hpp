@@ -141,13 +141,14 @@ namespace peripheral
             if (_should_exit) // 如果已经退出，则不执行后续操作。
                 return;
 
-            // 休眠 100ms 以防止中断触发过于频繁。
-            using namespace std::literals;
-            rtos::ThisThread::sleep_for(100ms);
-            // 读取中断源以清除中断标志。
-            adxl345.get_int_source(); // 结果不使用，因为只用一个中断。
             // 参见 feedback_message_enum_t::accel_notify。
             fmq.post_message_unique(_fmq_e_t::accel_notify, nullptr);
+
+            // 休眠以防止中断触发过于频繁。
+            using namespace std::literals;
+            rtos::ThisThread::sleep_for(1000ms);
+            // 读取中断源以清除中断标志。
+            adxl345.get_int_source(); // 结果不使用，因为只用一个中断。
         }
         void on_wait()
         {
