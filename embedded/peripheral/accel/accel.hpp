@@ -23,9 +23,6 @@
 
 namespace peripheral
 {
-    /**
-     * @todo 测试这个类。
-     */
     class accel : public peripheral_std_framework
     {
     private:
