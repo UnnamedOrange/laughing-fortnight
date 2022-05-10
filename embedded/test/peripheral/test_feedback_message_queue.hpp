@@ -121,32 +121,51 @@ namespace test
                 q.post_message(peripheral::feedback_message_enum_t::bc26_init,
                                nullptr);
                 msg = q.peek_message(
-                    peripheral::feedback_message_enum_t::accel_message_begin,
-                    peripheral::feedback_message_enum_t::accel_message_end);
-                // 应该是空消息。
+                    peripheral::feedback_message_enum_t::gps_message_begin,
+                    peripheral::feedback_message_enum_t::gps_message_end);
+                // 应该是空消息。bc26_init 被跳过。
                 if (msg.first == peripheral::feedback_message_enum_t::null)
                     utils::debug_printf("[D] filter 2\n");
                 else
                     utils::debug_printf("[F] filter 2\n");
                 rtos::ThisThread::sleep_for(1s);
 
-                // 测试 peek_message 能否收到过滤范围内的消息。
+                // 测试 peek_message 能否跳过被过滤的消息。
                 utils::debug_printf("[-] filter 3\n");
+                q.post_message(peripheral::feedback_message_enum_t::accel_init,
+                               nullptr);
                 msg = q.peek_message(
-                    peripheral::feedback_message_enum_t::bc26_message_begin,
-                    peripheral::feedback_message_enum_t::bc26_message_end);
-                // 应该是 bc26_init。
-                if (msg.first == peripheral::feedback_message_enum_t::bc26_init)
+                    peripheral::feedback_message_enum_t::accel_message_begin,
+                    peripheral::feedback_message_enum_t::accel_message_end);
+                // 应该是 accel_init。bc26_init 被跳过。
+                if (msg.first ==
+                    peripheral::feedback_message_enum_t::accel_init)
                     utils::debug_printf("[D] filter 3\n");
                 else
                     utils::debug_printf("[F] filter 3\n");
                 rtos::ThisThread::sleep_for(1s);
 
+                // 测试 get_message 能否跳过被过滤的消息。
+                utils::debug_printf("[-] filter 4\n");
+                q.post_message(peripheral::feedback_message_enum_t::accel_init,
+                               nullptr);
+                msg = q.get_message(
+                    peripheral::feedback_message_enum_t::accel_message_begin,
+                    peripheral::feedback_message_enum_t::accel_message_end);
+                // 应该是 accel_init。bc26_init 被跳过。
+                if (msg.first ==
+                    peripheral::feedback_message_enum_t::accel_init)
+                    utils::debug_printf("[D] filter 4\n");
+                else
+                    utils::debug_printf("[F] filter 4\n");
+                rtos::ThisThread::sleep_for(1s);
+
                 // 测试 get_message 能否忽视过滤范围外的消息。
                 // 以下代码阻塞就说明成功。
-                // utils::debug_printf("[-] filter 4\n");
-                // q.post_message(peripheral::feedback_message_enum_t::bc26_init,
-                //                nullptr);
+                // utils::debug_printf("[-] filter 5\n");
+                // // 此时队列中应该已有 bc26_init。
+                // q.post_message_unique(
+                //     peripheral::feedback_message_enum_t::bc26_init, nullptr);
                 // msg = q.get_message(
                 //     peripheral::feedback_message_enum_t::accel_message_begin,
                 //     peripheral::feedback_message_enum_t::accel_message_end);
