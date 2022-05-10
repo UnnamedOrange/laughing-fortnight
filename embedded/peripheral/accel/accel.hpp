@@ -61,10 +61,19 @@ namespace peripheral
                 on_init();
                 break;
             }
+            case accel_message_enum_t::wait_int:
+            {
+                on_wait();
+                break;
+            }
             default:
             {
                 break;
             }
+            }
+            if (empty()) // 如果消息队列已空，自动等待下一次中断。
+            {
+                wait_int();
             }
         }
         /**
@@ -98,6 +107,21 @@ namespace peripheral
             on_init(_external_fmq);
         }
 
+        /**
+         * @brief 等待中断。如果没有收到中断，将会一直阻塞。
+         */
+        void on_wait(_fmq_t& fmq)
+        {
+            _sem_irq.acquire(); // 如果没有收到中断，将会一直阻塞。
+
+            // 参见 feedback_message_enum_t::accel_notify。
+            fmq.post_message(_fmq_e_t::accel_notify, nullptr);
+        }
+        void on_wait()
+        {
+            on_wait(_external_fmq);
+        }
+
         // 以下函数是主模块的接口，均在主线程中运行。
     public:
         /**
@@ -106,6 +130,13 @@ namespace peripheral
         void init()
         {
             push(static_cast<int>(accel_message_enum_t::init), nullptr);
+        }
+        /**
+         * @brief 等待中断。如果没有收到中断，将会一直阻塞。
+         */
+        void wait_int()
+        {
+            push(static_cast<int>(accel_message_enum_t::wait_int), nullptr);
         }
     };
 } // namespace peripheral

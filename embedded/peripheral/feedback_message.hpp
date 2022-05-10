@@ -76,6 +76,11 @@ namespace peripheral
          */
         accel_init,
 
+        /**
+         * @brief 加速度计被移动的通知。
+         */
+        accel_notify,
+
         _message_end,
     };
 } // namespace peripheral
