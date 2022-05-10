@@ -38,12 +38,14 @@ namespace test
                 q.post_message(peripheral::feedback_message_enum_t::bc26_init,
                                nullptr);
 
+                // 测试 get_message 收正常消息。
                 utils::debug_printf("[-] get_message\n");
                 auto msg = q.get_message();
                 // 没有阻塞就说明成功。
                 utils::debug_printf("[D] get_message\n");
                 rtos::ThisThread::sleep_for(1s);
 
+                // 测试 peek_message 收空消息。
                 utils::debug_printf("[-] peek_message\n");
                 msg = q.peek_message();
                 // 应该是空消息。
@@ -58,6 +60,7 @@ namespace test
             {
                 peripheral::feedback_message_queue q;
 
+                // 测试 post_message_unique 发正常消息。
                 utils::debug_printf("[-] post unique 1\n");
                 q.post_message_unique(
                     peripheral::feedback_message_enum_t::bc26_init, nullptr);
@@ -66,9 +69,10 @@ namespace test
                 utils::debug_printf("[D] post unique 1\n");
                 rtos::ThisThread::sleep_for(1s);
 
+                // 测试 post_message_unique 是否能去重，额外数据是否正确。
+                utils::debug_printf("[-] post unique 2\n");
                 do
                 {
-                    utils::debug_printf("[-] post unique 2\n");
                     for (int i = 0; i < 2; i++)
                         q.post_message_unique(
                             peripheral::feedback_message_enum_t::bc26_init,
@@ -101,6 +105,7 @@ namespace test
                 q.post_message(peripheral::feedback_message_enum_t::bc26_init,
                                nullptr);
 
+                // 测试 get_message 能否收到过滤范围内的消息。
                 utils::debug_printf("[-] filter 1\n");
                 q.post_message_unique(
                     peripheral::feedback_message_enum_t::bc26_init, nullptr);
@@ -111,6 +116,7 @@ namespace test
                 utils::debug_printf("[D] filter 1\n");
                 rtos::ThisThread::sleep_for(1s);
 
+                // 测试 peek_message 能否忽视过滤范围外的消息。
                 utils::debug_printf("[-] filter 2\n");
                 q.post_message(peripheral::feedback_message_enum_t::bc26_init,
                                nullptr);
@@ -124,6 +130,7 @@ namespace test
                     utils::debug_printf("[F] filter 2\n");
                 rtos::ThisThread::sleep_for(1s);
 
+                // 测试 peek_message 能否收到过滤范围内的消息。
                 utils::debug_printf("[-] filter 3\n");
                 msg = q.peek_message(
                     peripheral::feedback_message_enum_t::bc26_message_begin,
@@ -135,6 +142,7 @@ namespace test
                     utils::debug_printf("[F] filter 3\n");
                 rtos::ThisThread::sleep_for(1s);
 
+                // 测试 get_message 能否忽视过滤范围外的消息。
                 // 以下代码阻塞就说明成功。
                 // utils::debug_printf("[-] filter 4\n");
                 // q.post_message(peripheral::feedback_message_enum_t::bc26_init,
