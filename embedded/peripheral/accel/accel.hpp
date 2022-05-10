@@ -43,7 +43,7 @@ namespace peripheral
             adxl345.reset_int1(); // 防止在信号量销毁后收到中断请求。
             _should_exit = true;
             _sem_irq.release(); // 强制释放信号量，以正常退出。
-            // 注意死锁。
+            // 注意死锁。在执行完 release 后一定不能执行 acquire。
             descendant_exit();
         }
 
@@ -130,8 +130,13 @@ namespace peripheral
          */
         void on_wait(_fmq_t& fmq)
         {
+            // 以下判断在现在仍然是必要的。
+            // 有可能释放信号量后，子线程持续运行到下一条消息，
+            // 然后主线程才请求父类结束。
+            // 加上该判断可以彻底解决死锁问题。
             if (_should_exit) // 如果已经退出，则不获取信号量。
                 return; // 防止该子类被销毁后继续使用信号量。
+
             _sem_irq.acquire(); // 如果没有收到中断，将会一直阻塞。
             if (_should_exit) // 如果已经退出，则不执行后续操作。
                 return;
