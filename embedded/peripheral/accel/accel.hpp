@@ -17,6 +17,7 @@
 #include "../global_peripheral.hpp"
 #include "../peripheral_std_framework.hpp"
 #include "accel_message.hpp"
+#include "adxl345_int.hpp"
 #include "adxl345_middleware.hpp"
 #include <utils/debug.hpp>
 
@@ -90,10 +91,20 @@ namespace peripheral
                 if (!adxl345.check_devid()) // 初始化失败，
                     break;                  // 检查接线是否正确。
 
-                adxl345.software_reset(); // 先复位。复位后没有中断被打开。
-                adxl345.set_data_format(); // TODO: 选择合适的数据格式。
-                adxl345.set_int_enable(); // TODO: 选择合适的中断源。
-                adxl345.set_power_control(); // TODO: 选择合适的电源模式。
+                // 先复位。复位后没有中断被打开。
+                adxl345.software_reset();
+                // TODO: 选择合适的数据格式。
+                adxl345.set_data_format();
+                // 设置 ACTIVITY 阈值。
+                // TODO: 使用更好的阈值。
+                adxl345.set_threshold_act(10);
+                // 设置 ACTIVITY 控制选项。
+                // 交流耦合，三轴均有效。
+                adxl345.set_act_inact_control(0xF0);
+                // 只打开 ACTIVITY 中断，表示监测活动。
+                adxl345.set_int_enable(adxl345_int::ACTIVITY);
+                // TODO: 选择合适的电源模式。
+                adxl345.set_power_control();
 
                 if (!adxl345.check_devid()) // 初始化失败，
                     break;                  // 检查程序是否正确。
@@ -119,6 +130,9 @@ namespace peripheral
             if (_should_exit) // 如果已经退出，则不执行，
                 return; // 并且之后不会有新消息，所以前面无需再判断。
 
+            // 休眠 100ms 以防止中断触发过于频繁。
+            using namespace std::literals;
+            rtos::ThisThread::sleep_for(100ms);
             // 读取中断源以清除中断标志。
             adxl345.get_int_source(); // 结果不使用，因为只用一个中断。
             // 参见 feedback_message_enum_t::accel_notify。

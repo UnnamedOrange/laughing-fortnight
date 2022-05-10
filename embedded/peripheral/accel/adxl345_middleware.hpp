@@ -195,5 +195,43 @@ namespace peripheral
             return static_cast<adxl345_int::adxl345_int>(
                 read(adxl345_address::INT_SOURCE));
         }
+
+        /**
+         * @brief 设置活动检测阈值。
+         *
+         * @note 复位后的 0。值为 0 时，该功能无法正常工作。
+         *
+         * @param threshold 阈值。比例因子为 62.5 mg/LSB。
+         */
+        void set_threshold_act(uint8_t threshold)
+        {
+            write(adxl345_address::THRESH_ACT, static_cast<char>(threshold));
+        }
+        /**
+         * @brief 读取活动检测阈值。
+         *
+         * @return uint8_t 阈值。比例因子为 62.5 mg/LSB。
+         */
+        uint8_t get_threshold_act()
+        {
+            return static_cast<uint8_t>(read(adxl345_address::THRESH_ACT));
+        }
+
+        /**
+         * @brief 设置活动/非活动检测功能的控制选项。
+         *
+         * @note 请参阅文档。
+         */
+        void set_act_inact_control(char control)
+        {
+            write(adxl345_address::ACT_INACT_CTL, control);
+        }
+        /**
+         * @brief 读取活动/非活动检测功能的控制选项。
+         */
+        char get_act_inact_control()
+        {
+            return read(adxl345_address::ACT_INACT_CTL);
+        }
     };
 } // namespace peripheral
