@@ -20,6 +20,11 @@ namespace peripheral
         _message_begin = null,
 
         /**
+         * @brief BC26 模块消息的起始点。
+         */
+        bc26_message_begin,
+
+        /**
          * @brief BC26 模块 send_at 的反馈消息。
          *
          * @param bool 是否成功收到 OK。
@@ -70,6 +75,26 @@ namespace peripheral
         bc26_init,
 
         /**
+         * @brief BC26 模块消息的终止点。
+         */
+        bc26_message_end,
+
+        /**
+         * @brief GPS 模块消息的起始点。
+         */
+        gps_message_begin,
+
+        /**
+         * @brief GPS 模块消息的终止点。
+         */
+        gps_message_end,
+
+        /**
+         * @brief 加速度计模块消息的起始点。
+         */
+        accel_message_begin,
+
+        /**
          * @brief 加速度计初始化的反馈信息。
          *
          * @param bool 是否初始化成功。
@@ -80,6 +105,11 @@ namespace peripheral
          * @brief 加速度计被移动的通知。
          */
         accel_notify,
+
+        /**
+         * @brief 加速度计模块消息的终止点。
+         */
+        accel_message_end,
 
         _message_end,
     };

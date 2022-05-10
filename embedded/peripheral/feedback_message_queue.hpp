@@ -13,6 +13,7 @@
 #include "mbed.h"
 
 #include <deque>
+#include <utility>
 
 #include "feedback_message.hpp"
 
@@ -105,6 +106,41 @@ namespace peripheral
             return message;
         }
         /**
+         * @brief 阻塞地获取消息队列中的消息。如果队列中没有范围内的消息则等待。
+         *
+         * @param min_message 获取消息的最小编号。
+         * @param max_message 获取消息的最大编号。
+         * @return message_t 收到的消息。
+         */
+        message_t get_message(feedback_message_enum_t min_message,
+                              feedback_message_enum_t max_message)
+        {
+            message_t message;
+            {
+                rtos::ScopedMutexLock lock(_mutex_queue);
+                _cond_queue.wait([this, &min_message, &max_message]() {
+                    return std::count_if(
+                        _queue.rbegin(),
+                        _queue.rend(), // 倒序以加快新消息的查找。
+                        [&](const message_t& msg) {
+                            return min_message <= msg.first &&
+                                   msg.first <= max_message;
+                        });
+                });
+                // 顺序查找最早的消息。
+                for (auto it = _queue.begin(); it != _queue.end(); it++)
+                {
+                    if (min_message <= it->first && it->first <= max_message)
+                    {
+                        message = *it;
+                        _queue.erase(it);
+                        break;
+                    }
+                }
+            }
+            return message;
+        }
+        /**
          * @brief 非阻塞地获取消息队列中的消息。
          *
          * @return message_t 收到的消息。
@@ -117,6 +153,31 @@ namespace peripheral
                 return {feedback_message_enum_t::null, nullptr};
             auto message = _queue.front();
             _queue.pop_front();
+            return message;
+        }
+        /**
+         * @brief 非阻塞地获取消息队列中的消息。
+         *
+         * @param min_message 获取消息的最小编号。
+         * @param max_message 获取消息的最大编号。
+         * @return message_t 收到的消息。如果队列中没有范围内的消息，
+         * 返回 {feedback_message_enum_t::null, nullptr}。
+         */
+        message_t peek_message(feedback_message_enum_t min_message,
+                               feedback_message_enum_t max_message)
+        {
+            rtos::ScopedMutexLock lock{_mutex_queue};
+            message_t message{feedback_message_enum_t::null, nullptr};
+            // 顺序查找最早的消息。
+            for (auto it = _queue.begin(); it != _queue.end(); it++)
+            {
+                if (min_message <= it->first && it->first <= max_message)
+                {
+                    message = *it;
+                    _queue.erase(it);
+                    break;
+                }
+            }
             return message;
         }
     };
