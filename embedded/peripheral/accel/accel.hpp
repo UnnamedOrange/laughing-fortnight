@@ -35,6 +35,19 @@ namespace peripheral
     public:
         accel(_fmq_t& fmq) : _external_fmq(fmq)
         {
+            adxl345.set_int1(std::bind(&accel::irq_callback, this));
+        }
+        ~accel()
+        {
+            adxl345.reset_int1(); // 防止在信号量销毁后收到中断请求。
+        }
+
+    private:
+        rtos::Semaphore _sem_irq{0, 1};
+        void irq_callback()
+        {
+            _sem_irq.try_acquire(); // 先获取再释放，保证接下来可释放。
+            _sem_irq.release(); // 释放信号量，可获取的信号量就表示有事件。
         }
 
         // 以下函数是子模块的回调函数，均在子线程中运行。
@@ -67,8 +80,6 @@ namespace peripheral
 
                 adxl345.software_reset(); // 先复位。复位后没有中断被打开。
                 adxl345.set_data_format(); // TODO: 选择合适的数据格式。
-                // TODO: 设置中断回调函数。
-
                 adxl345.set_int_enable(); // TODO: 选择合适的中断源。
                 adxl345.set_power_control(); // TODO: 选择合适的电源模式。
 
