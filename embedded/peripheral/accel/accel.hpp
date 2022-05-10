@@ -120,7 +120,7 @@ namespace peripheral
                 return; // 并且之后不会有新消息，所以前面无需再判断。
 
             // 参见 feedback_message_enum_t::accel_notify。
-            fmq.post_message(_fmq_e_t::accel_notify, nullptr);
+            fmq.post_message_unique(_fmq_e_t::accel_notify, nullptr);
         }
         void on_wait()
         {

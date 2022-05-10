@@ -12,7 +12,7 @@
 
 #include "mbed.h"
 
-#include <queue>
+#include <deque>
 
 #include "feedback_message.hpp"
 
@@ -21,6 +21,8 @@ namespace peripheral
     /**
      * @brief 用于子模块向主模块反馈消息的消息队列。
      * 是一个多生产者单消费者的队列。
+     *
+     * @todo 测试这个类。
      *
      * @note 这个类是线程安全的。
      */
@@ -42,7 +44,7 @@ namespace peripheral
         // 消息队列的条件变量。
         rtos::ConditionVariable _cond_queue{_mutex_queue};
         // 消息队列。
-        std::queue<message_t> _queue;
+        std::deque<message_t> _queue;
 
     public:
         /**
@@ -55,8 +57,34 @@ namespace peripheral
                           std::shared_ptr<void> data)
         {
             rtos::ScopedMutexLock lock{_mutex_queue};
-            _queue.push({id, data});
+            _queue.push_back({id, data});
             _cond_queue.notify_one();
+        }
+        /**
+         * @brief 向消息队列发送消息。
+         * 如果这种类型的消息已经存在，则覆盖最晚的消息。
+         *
+         * @param id 消息 id。
+         * @param data 消息的额外数据。
+         */
+        void post_message_unique(feedback_message_enum_t id,
+                                 std::shared_ptr<void> data)
+        {
+            rtos::ScopedMutexLock lock{_mutex_queue};
+            bool _has_found = false;
+            // 倒序查找最晚的消息。
+            for (auto it = _queue.rbegin(); it != _queue.rend(); it++)
+            {
+                if (it->first == id) // 找到了这种类型的消息。
+                {
+                    _has_found = true;
+                    it->second = data; // 将其额外数据覆盖。
+                    break;
+                }
+            }
+
+            if (!_has_found) // 如果没有找到，正常发送。
+                post_message(id, data);
         }
 
     public:
@@ -72,7 +100,7 @@ namespace peripheral
                 rtos::ScopedMutexLock lock(_mutex_queue);
                 _cond_queue.wait([this]() { return !_queue.empty(); });
                 message = _queue.front();
-                _queue.pop();
+                _queue.pop_front();
             }
             return message;
         }
@@ -88,7 +116,7 @@ namespace peripheral
             if (_queue.empty())
                 return {feedback_message_enum_t::null, nullptr};
             auto message = _queue.front();
-            _queue.pop();
+            _queue.pop_front();
             return message;
         }
     };
