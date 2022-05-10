@@ -12,6 +12,7 @@
 #include "mbed.h"
 
 #include "adxl345_address.hpp"
+#include "adxl345_int.hpp"
 #include "adxl345_interface.hpp"
 
 namespace peripheral
@@ -154,31 +155,34 @@ namespace peripheral
          *
          * @note 默认参数取自最小初始化序列。
          */
-        void set_int_enable(char which = 0x80)
+        void set_int_enable(
+            adxl345_int::adxl345_int which = adxl345_int::DATAREADY)
         {
-            write(adxl345_address::INT_ENABLE, which);
+            write(adxl345_address::INT_ENABLE, static_cast<char>(which));
         }
         /**
          * @brief 获取中断触发。
          */
-        char get_int_enable()
+        adxl345_int::adxl345_int get_int_enable()
         {
-            return read(adxl345_address::INT_ENABLE);
+            return static_cast<adxl345_int::adxl345_int>(
+                read(adxl345_address::INT_ENABLE));
         }
 
         /**
          * @brief 设置中断映射。置 1 的位表示通过中断 2 管脚发送中断请求。
          */
-        void set_int_map(char which)
+        void set_int_map(adxl345_int::adxl345_int which)
         {
-            write(adxl345_address::INT_MAP, which);
+            write(adxl345_address::INT_MAP, static_cast<char>(which));
         }
         /**
          * @brief 获取中断映射。置 1 的位表示通过中断 2 管脚发送中断请求。
          */
-        char get_int_map()
+        adxl345_int::adxl345_int get_int_map()
         {
-            return read(adxl345_address::INT_MAP);
+            return static_cast<adxl345_int::adxl345_int>(
+                read(adxl345_address::INT_MAP));
         }
 
         /**
@@ -186,9 +190,10 @@ namespace peripheral
          * 除了 data_read (d7), watermark (d1), overrun (d0)，
          * 其他中断源将会在调用该函数时被清除。
          */
-        char get_int_source()
+        adxl345_int::adxl345_int get_int_source()
         {
-            return read(adxl345_address::INT_SOURCE);
+            return static_cast<adxl345_int::adxl345_int>(
+                read(adxl345_address::INT_SOURCE));
         }
     };
 } // namespace peripheral
