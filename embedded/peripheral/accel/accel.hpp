@@ -40,9 +40,12 @@ namespace peripheral
         ~accel()
         {
             adxl345.reset_int1(); // 防止在信号量销毁后收到中断请求。
+            _should_exit = true;
+            _sem_irq.release(); // 强制释放信号量，以正常退出。
         }
 
     private:
+        bool _should_exit{};
         rtos::Semaphore _sem_irq{0, 1};
         void irq_callback()
         {
@@ -113,6 +116,8 @@ namespace peripheral
         void on_wait(_fmq_t& fmq)
         {
             _sem_irq.acquire(); // 如果没有收到中断，将会一直阻塞。
+            if (_should_exit) // 如果已经退出，则不执行，
+                return; // 并且之后不会有新消息，所以前面无需再判断。
 
             // 参见 feedback_message_enum_t::accel_notify。
             fmq.post_message(_fmq_e_t::accel_notify, nullptr);
