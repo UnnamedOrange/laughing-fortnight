@@ -199,7 +199,7 @@ namespace peripheral
         /**
          * @brief 设置活动检测阈值。
          *
-         * @note 复位后的 0。值为 0 时，该功能无法正常工作。
+         * @note 复位后的初始值为 0。值为 0 时，该功能无法正常工作。
          *
          * @param threshold 阈值。比例因子为 62.5 mg/LSB。
          */
