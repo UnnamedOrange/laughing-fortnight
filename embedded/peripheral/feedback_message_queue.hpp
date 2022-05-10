@@ -23,8 +23,6 @@ namespace peripheral
      * @brief 用于子模块向主模块反馈消息的消息队列。
      * 是一个多生产者单消费者的队列。
      *
-     * @todo 测试这个类。
-     *
      * @note 这个类是线程安全的。
      */
     class feedback_message_queue
