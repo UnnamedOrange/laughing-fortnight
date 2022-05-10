@@ -11,8 +11,9 @@
 
 #include <utils/app.hpp>
 
-#include "peripheral/test_peripheral_thread.hpp"
+#include "peripheral/test_feedback_message_queue.hpp"
 #include "peripheral/test_peripheral_std_framework.hpp"
+#include "peripheral/test_peripheral_thread.hpp"
 
 namespace test
 {
@@ -26,6 +27,7 @@ namespace test
     inline void test_all()
     {
         // 在此处添加要测试的 app 类。
+        utils::run_app<test_feedback_message_queue>();
         utils::run_app<test_peripheral_thread>();
         utils::run_app<test_peripheral_std_framework>();
     }

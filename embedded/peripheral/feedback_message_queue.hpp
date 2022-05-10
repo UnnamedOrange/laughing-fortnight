@@ -12,7 +12,8 @@
 
 #include "mbed.h"
 
-#include <queue>
+#include <deque>
+#include <utility>
 
 #include "feedback_message.hpp"
 
@@ -42,7 +43,7 @@ namespace peripheral
         // 消息队列的条件变量。
         rtos::ConditionVariable _cond_queue{_mutex_queue};
         // 消息队列。
-        std::queue<message_t> _queue;
+        std::deque<message_t> _queue;
 
     public:
         /**
@@ -55,8 +56,34 @@ namespace peripheral
                           std::shared_ptr<void> data)
         {
             rtos::ScopedMutexLock lock{_mutex_queue};
-            _queue.push({id, data});
+            _queue.push_back({id, data});
             _cond_queue.notify_one();
+        }
+        /**
+         * @brief 向消息队列发送消息。
+         * 如果这种类型的消息已经存在，则覆盖最晚的消息。
+         *
+         * @param id 消息 id。
+         * @param data 消息的额外数据。
+         */
+        void post_message_unique(feedback_message_enum_t id,
+                                 std::shared_ptr<void> data)
+        {
+            rtos::ScopedMutexLock lock{_mutex_queue};
+            bool _has_found = false;
+            // 倒序查找最晚的消息。
+            for (auto it = _queue.rbegin(); it != _queue.rend(); it++)
+            {
+                if (it->first == id) // 找到了这种类型的消息。
+                {
+                    _has_found = true;
+                    it->second = data; // 将其额外数据覆盖。
+                    break;
+                }
+            }
+
+            if (!_has_found) // 如果没有找到，正常发送。
+                post_message(id, data);
         }
 
     public:
@@ -72,7 +99,42 @@ namespace peripheral
                 rtos::ScopedMutexLock lock(_mutex_queue);
                 _cond_queue.wait([this]() { return !_queue.empty(); });
                 message = _queue.front();
-                _queue.pop();
+                _queue.pop_front();
+            }
+            return message;
+        }
+        /**
+         * @brief 阻塞地获取消息队列中的消息。如果队列中没有范围内的消息则等待。
+         *
+         * @param min_message 获取消息的最小编号。
+         * @param max_message 获取消息的最大编号。
+         * @return message_t 收到的消息。
+         */
+        message_t get_message(feedback_message_enum_t min_message,
+                              feedback_message_enum_t max_message)
+        {
+            message_t message;
+            {
+                rtos::ScopedMutexLock lock(_mutex_queue);
+                _cond_queue.wait([this, &min_message, &max_message]() {
+                    return std::count_if(
+                        _queue.rbegin(),
+                        _queue.rend(), // 倒序以加快新消息的查找。
+                        [&](const message_t& msg) {
+                            return min_message <= msg.first &&
+                                   msg.first <= max_message;
+                        });
+                });
+                // 顺序查找最早的消息。
+                for (auto it = _queue.begin(); it != _queue.end(); it++)
+                {
+                    if (min_message <= it->first && it->first <= max_message)
+                    {
+                        message = *it;
+                        _queue.erase(it);
+                        break;
+                    }
+                }
             }
             return message;
         }
@@ -88,7 +150,32 @@ namespace peripheral
             if (_queue.empty())
                 return {feedback_message_enum_t::null, nullptr};
             auto message = _queue.front();
-            _queue.pop();
+            _queue.pop_front();
+            return message;
+        }
+        /**
+         * @brief 非阻塞地获取消息队列中的消息。
+         *
+         * @param min_message 获取消息的最小编号。
+         * @param max_message 获取消息的最大编号。
+         * @return message_t 收到的消息。如果队列中没有范围内的消息，
+         * 返回 {feedback_message_enum_t::null, nullptr}。
+         */
+        message_t peek_message(feedback_message_enum_t min_message,
+                               feedback_message_enum_t max_message)
+        {
+            rtos::ScopedMutexLock lock{_mutex_queue};
+            message_t message{feedback_message_enum_t::null, nullptr};
+            // 顺序查找最早的消息。
+            for (auto it = _queue.begin(); it != _queue.end(); it++)
+            {
+                if (min_message <= it->first && it->first <= max_message)
+                {
+                    message = *it;
+                    _queue.erase(it);
+                    break;
+                }
+            }
             return message;
         }
     };

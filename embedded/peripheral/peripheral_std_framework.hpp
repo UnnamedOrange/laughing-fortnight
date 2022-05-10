@@ -57,7 +57,37 @@ namespace peripheral
                 _should_exit = true;
                 _cond_queue.notify_one();
             }
-           peripheral_thread::join();
+            peripheral_thread::join();
+        }
+
+        // 解决子类的线程安全问题。
+    private:
+        bool _descendant_exit{};
+        rtos::Mutex _mutex_descendant;
+
+    protected:
+        /**
+         * @brief 在子类析构函数中调用该函数，通知父类不再处理新消息。
+         * 这是为了防止子类被销毁后父类还准备执行新的消息。
+         */
+        void descendant_exit()
+        {
+            _descendant_exit = true;
+            _mutex_descendant.lock();
+        }
+        /**
+         * @brief 在子类消息处理函数开头调用该函数。
+         */
+        void descendant_callback_begin()
+        {
+            _mutex_descendant.lock();
+        }
+        /**
+         * @brief 在子类消息处理函数末尾调用该函数。
+         */
+        void descendant_callback_end()
+        {
+            _mutex_descendant.unlock();
         }
 
     private:
@@ -83,6 +113,9 @@ namespace peripheral
                     // ScopedMutexLock 析构函数自动释放锁。
                 }
 
+                // 如果子类已经退出，则不执行消息处理。
+                if (_descendant_exit)
+                    break;
                 // 在子线程中处理消息。此时队列锁已释放。
                 on_message(message.first, std::move(message.second));
             }

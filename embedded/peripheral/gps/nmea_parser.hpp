@@ -20,6 +20,7 @@
 
 #include "../command_receiver_serial.hpp"
 #include "../peripheral_thread.hpp"
+#include <utils/debug.hpp>
 
 namespace peripheral
 {

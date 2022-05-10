@@ -15,6 +15,16 @@ namespace peripheral
     {
         _message_begin,
 
+        /**
+         * @brief 初始化。
+         */
+        init,
+
+        /**
+         * @brief 等待中断。如果没有收到中断，将会一直阻塞。
+         */
+        wait_int,
+
         _message_end,
         /**
          * @brief 被定义的消息的总数。
