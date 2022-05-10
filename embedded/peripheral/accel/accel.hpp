@@ -126,9 +126,11 @@ namespace peripheral
          */
         void on_wait(_fmq_t& fmq)
         {
+            if (_should_exit) // 如果已经退出，则不获取信号量。
+                return; // 防止该子类被销毁后继续使用信号量。
             _sem_irq.acquire(); // 如果没有收到中断，将会一直阻塞。
-            if (_should_exit) // 如果已经退出，则不执行，
-                return; // 并且之后不会有新消息，所以前面无需再判断。
+            if (_should_exit) // 如果已经退出，则不执行后续操作。
+                return;
 
             // 休眠 100ms 以防止中断触发过于频繁。
             using namespace std::literals;
