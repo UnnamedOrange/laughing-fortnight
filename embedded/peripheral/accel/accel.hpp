@@ -70,7 +70,7 @@ namespace peripheral
             }
             case accel_message_enum_t::wait_int:
             {
-                on_wait();
+                on_wait_int();
                 break;
             }
             default:
@@ -128,7 +128,7 @@ namespace peripheral
         /**
          * @brief 等待中断。如果没有收到中断，将会一直阻塞。
          */
-        void on_wait(_fmq_t& fmq)
+        void on_wait_int(_fmq_t& fmq)
         {
             // 以下判断在现在仍然是必要的。
             // 有可能释放信号量后，子线程持续运行到下一条消息，
@@ -150,9 +150,9 @@ namespace peripheral
             // 读取中断源以清除中断标志。
             adxl345.get_int_source(); // 结果不使用，因为只用一个中断。
         }
-        void on_wait()
+        void on_wait_int()
         {
-            on_wait(_external_fmq);
+            on_wait_int(_external_fmq);
         }
 
         // 以下函数是主模块的接口，均在主线程中运行。
@@ -166,6 +166,8 @@ namespace peripheral
         }
         /**
          * @brief 等待中断。如果没有收到中断，将会一直阻塞。
+         *
+         * @note 该函数会在消息队列为空时自动被调用。
          */
         void wait_int()
         {
