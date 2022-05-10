@@ -42,11 +42,16 @@ namespace peripheral
         bc26(_fmq_t& fmq) : _external_fmq(fmq)
         {
         }
+        ~bc26()
+        {
+            descendant_exit();
+        }
 
         // 以下函数是子模块的回调函数，均在子线程中运行。
     private:
         void on_message(int id, std::shared_ptr<void> data) override
         {
+            descendant_callback_begin();
             switch (static_cast<bc26_message_t>(id))
             {
             case bc26_message_t::send_at:
@@ -89,6 +94,7 @@ namespace peripheral
                 break;
             }
             }
+            descendant_callback_end();
         }
         /**
          * @brief 重复发送 AT 指令，直到收到 OK。

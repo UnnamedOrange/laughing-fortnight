@@ -45,11 +45,16 @@ namespace peripheral
         gps(_fmq_t& fmq) : _external_fmq(fmq)
         {
         }
+        ~gps()
+        {
+            descendant_exit();
+        }
 
         // 以下函数是子模块的回调函数，均在子线程中运行。
     private:
         void on_message(int id, std::shared_ptr<void> data) override
         {
+            descendant_callback_begin();
             switch (static_cast<gps_message_enum_t>(id))
             {
             default:
@@ -57,6 +62,7 @@ namespace peripheral
                 break;
             }
             }
+            descendant_callback_end();
         }
 
         // 以下函数是主模块的接口，均在主线程中运行。

@@ -43,6 +43,8 @@ namespace peripheral
             adxl345.reset_int1(); // 防止在信号量销毁后收到中断请求。
             _should_exit = true;
             _sem_irq.release(); // 强制释放信号量，以正常退出。
+            // 注意死锁。
+            descendant_exit();
         }
 
     private:
@@ -58,6 +60,7 @@ namespace peripheral
     private:
         void on_message(int id, std::shared_ptr<void> data) override
         {
+            descendant_callback_begin();
             switch (static_cast<accel_message_enum_t>(id))
             {
             case accel_message_enum_t::init:
@@ -79,6 +82,7 @@ namespace peripheral
             {
                 wait_int();
             }
+            descendant_callback_end();
         }
         /**
          * @brief 初始化。
