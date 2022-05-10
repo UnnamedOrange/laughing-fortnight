@@ -119,6 +119,8 @@ namespace peripheral
             if (_should_exit) // 如果已经退出，则不执行，
                 return; // 并且之后不会有新消息，所以前面无需再判断。
 
+            // 读取中断源以清除中断标志。
+            adxl345.get_int_source(); // 结果不使用，因为只用一个中断。
             // 参见 feedback_message_enum_t::accel_notify。
             fmq.post_message_unique(_fmq_e_t::accel_notify, nullptr);
         }

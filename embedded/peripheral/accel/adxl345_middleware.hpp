@@ -180,5 +180,15 @@ namespace peripheral
         {
             return read(adxl345_address::INT_MAP);
         }
+
+        /**
+         * @brief 读取中断源。
+         * 除了 data_read (d7), watermark (d1), overrun (d0)，
+         * 其他中断源将会在调用该函数时被清除。
+         */
+        char get_int_source()
+        {
+            return read(adxl345_address::INT_SOURCE);
+        }
     };
 } // namespace peripheral
