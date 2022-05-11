@@ -23,6 +23,7 @@
 #include "../peripheral_std_framework.hpp"
 #include "bc26_message.hpp"
 #include <utils/debug.hpp>
+#include <utils/msg_data.hpp>
 
 namespace peripheral
 {
@@ -278,20 +279,20 @@ namespace peripheral
                     on_send_at(10, internal_fmq);
                     msg = internal_fmq.get_message();
                     assert(msg.first == feedback_message_enum_t::bc26_send_at);
-                    if (!*std::static_pointer_cast<bool>(msg.second))
+                    if (!utils::msg_data<bool>(msg))
                         break;
 
                     on_send_ate(false, internal_fmq);
                     msg = internal_fmq.get_message();
                     assert(msg.first == feedback_message_enum_t::bc26_send_ate);
-                    if (!*std::static_pointer_cast<bool>(msg.second))
+                    if (!utils::msg_data<bool>(msg))
                         break;
 
                     on_send_at_cfun_set(1, internal_fmq);
                     msg = internal_fmq.get_message();
                     assert(msg.first ==
                            feedback_message_enum_t::bc26_send_at_cfun_set);
-                    if (!*std::static_pointer_cast<bool>(msg.second))
+                    if (!utils::msg_data<bool>(msg))
                         break;
 
                     on_send_at_cimi(internal_fmq);

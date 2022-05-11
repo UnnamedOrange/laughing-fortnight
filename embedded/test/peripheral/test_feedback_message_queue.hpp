@@ -13,6 +13,7 @@
 #include <peripheral/feedback_message_queue.hpp>
 #include <utils/app.hpp>
 #include <utils/debug.hpp>
+#include <utils/msg_data.hpp>
 
 namespace test
 {
@@ -82,7 +83,7 @@ namespace test
                     // 消息类型不对或额外数据错误。额外数据应该是 1。
                     if (msg.first !=
                             peripheral::feedback_message_enum_t::bc26_init ||
-                        *std::static_pointer_cast<int>(msg.second) != 1)
+                        utils::msg_data<int>(msg) != 1)
                     {
                         utils::debug_printf("[F] post unique 2\n");
                         break;
