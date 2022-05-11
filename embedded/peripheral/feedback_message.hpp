@@ -85,6 +85,13 @@ namespace peripheral
         gps_message_begin,
 
         /**
+         * @brief GPS 模块初始化的反馈信息。
+         *
+         * @param bool 是否初始化成功。
+         */
+        gps_init,
+
+        /**
          * @brief GPS 模块消息的终止点。
          */
         gps_message_end,

@@ -57,6 +57,11 @@ namespace peripheral
             descendant_callback_begin();
             switch (static_cast<gps_message_enum_t>(id))
             {
+            case gps_message_enum_t::init:
+            {
+                on_init();
+                break;
+            }
             default:
             {
                 break;
@@ -64,9 +69,33 @@ namespace peripheral
             }
             descendant_callback_end();
         }
+        /**
+         * @brief 初始化。
+         */
+        void on_init(_fmq_t& fmq)
+        {
+            // TODO: 补充 GPS 初始化的流程。
+            bool is_success = true;
+
+            // 参见 feedback_message_enum_t::gps_init。
+            fmq.post_message(_fmq_e_t::gps_init,
+                             std::make_shared<bool>(is_success));
+        }
+        void on_init()
+        {
+            on_init(_external_fmq);
+        }
 
         // 以下函数是主模块的接口，均在主线程中运行。
     public:
+        /**
+         * @brief 初始化。
+         */
+        void init()
+        {
+            push(static_cast<int>(gps_message_enum_t::init), nullptr);
+        }
+
         /**
          * @brief 获取当前的位置信息。
          *
