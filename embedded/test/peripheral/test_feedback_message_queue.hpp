@@ -111,8 +111,8 @@ namespace test
                 q.post_message_unique(
                     peripheral::feedback_message_enum_t::bc26_init, nullptr);
                 auto msg = q.get_message(
-                    peripheral::feedback_message_enum_t::bc26_message_begin,
-                    peripheral::feedback_message_enum_t::bc26_message_end);
+                    peripheral::feedback_message_enum_t::init_message_begin,
+                    peripheral::feedback_message_enum_t::init_message_end);
                 // 没有阻塞就说明成功。
                 utils::debug_printf("[D] filter 1\n");
                 rtos::ThisThread::sleep_for(1s);
@@ -133,14 +133,14 @@ namespace test
 
                 // 测试 peek_message 能否跳过被过滤的消息。
                 utils::debug_printf("[-] filter 3\n");
-                q.post_message(peripheral::feedback_message_enum_t::accel_init,
-                               nullptr);
+                q.post_message(
+                    peripheral::feedback_message_enum_t::accel_notify, nullptr);
                 msg = q.peek_message(
                     peripheral::feedback_message_enum_t::accel_message_begin,
                     peripheral::feedback_message_enum_t::accel_message_end);
-                // 应该是 accel_init。bc26_init 被跳过。
+                // 应该是 accel_notify。bc26_init 被跳过。
                 if (msg.first ==
-                    peripheral::feedback_message_enum_t::accel_init)
+                    peripheral::feedback_message_enum_t::accel_notify)
                     utils::debug_printf("[D] filter 3\n");
                 else
                     utils::debug_printf("[F] filter 3\n");
@@ -148,14 +148,14 @@ namespace test
 
                 // 测试 get_message 能否跳过被过滤的消息。
                 utils::debug_printf("[-] filter 4\n");
-                q.post_message(peripheral::feedback_message_enum_t::accel_init,
-                               nullptr);
+                q.post_message(
+                    peripheral::feedback_message_enum_t::accel_notify, nullptr);
                 msg = q.get_message(
                     peripheral::feedback_message_enum_t::accel_message_begin,
                     peripheral::feedback_message_enum_t::accel_message_end);
-                // 应该是 accel_init。bc26_init 被跳过。
+                // 应该是 accel_notify。bc26_init 被跳过。
                 if (msg.first ==
-                    peripheral::feedback_message_enum_t::accel_init)
+                    peripheral::feedback_message_enum_t::accel_notify)
                     utils::debug_printf("[D] filter 4\n");
                 else
                     utils::debug_printf("[F] filter 4\n");
