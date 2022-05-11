@@ -7,6 +7,9 @@
  * See the LICENSE file in the repository root for full license text.
  */
 
+// 仅作用于 NUCLEO L476RG 开发板。
+#ifdef TARGET_NUCLEO_L476RG
+
 #include "mbed.h"
 
 extern "C"
@@ -84,3 +87,5 @@ extern "C"
         return 1; // OK
     }
 }
+
+#endif
