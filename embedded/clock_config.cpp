@@ -68,9 +68,9 @@ extern "C"
             (RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_PCLK1 |
              RCC_CLOCKTYPE_PCLK2);
         RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK; // 8 MHz
-        RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV4;        // 2 MHz
-        RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;         // 2 MHz
-        RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;         // 2 MHz
+        RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV2;        // 4 MHz
+        RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;         // 4 MHz
+        RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;         // 4 MHz
         if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
         {
             return 0; // FAIL
