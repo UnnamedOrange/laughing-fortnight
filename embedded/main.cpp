@@ -11,6 +11,9 @@
 // #define RUN_TEST 1
 // #define RUN_TEST_ACCEL 1
 
+// 取消注释以使用番茄闹钟进行调试。
+// #define USE_TFT_FOR_DEBUG_CONSOLE 1
+
 #include "mbed.h"
 
 #include <memory>
