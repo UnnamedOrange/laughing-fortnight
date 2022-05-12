@@ -111,6 +111,63 @@ class Main
         }
         return true;
     }
+    /**
+     * @brief 主循环。对应框图右边两列的大循环。
+     */
+    void main_loop()
+    {
+        while (true)
+        {
+            peripheral::feedback_message_queue::message_t msg;
+            // 低功耗？
+            if (is_low_power_mode())
+            {
+                // 等待。
+                msg = fmq.get_message();
+            }
+            else
+            {
+                msg = fmq.peek_message();
+            }
+            // 数据处理与控制。
+            transfer(msg);
+        }
+    }
+    /**
+     * @brief 系统是否应该处于低功耗状态。
+     */
+    bool is_low_power_mode() const
+    {
+        // TODO.
+        return true;
+    }
+    /**
+     * @brief 数据处理与控制，即状态转移。
+     */
+    void transfer(const peripheral::feedback_message_queue::message_t& msg)
+    {
+        using fmq_e_t = peripheral::feedback_message_enum_t;
+        switch (msg.first)
+        {
+            // 非低功耗模式下，进行额外的处理与控制。
+        case fmq_e_t::null:
+        {
+            on_idle();
+            break;
+        }
+            // TODO: 实现所有消息的处理。
+        default:
+            break;
+        }
+    }
+    /**
+     * @brief 非低功耗模式下，进行额外的处理与控制。
+     *
+     */
+    void on_idle()
+    {
+        // TODO.
+    }
 
 public:
     Main()
@@ -131,6 +188,13 @@ public:
             utils::debug_printf("[E] Init fail.\n");
             return; // 异常情况，退出。
         }
+
+        // 获取位置并发送。
+        // TODO: 考虑定位不会一开始就有，但开机就应该可以控制系统。
+        // 此处的过程还待设计。
+
+        // 消息循环。
+        main_loop();
     }
 };
 
