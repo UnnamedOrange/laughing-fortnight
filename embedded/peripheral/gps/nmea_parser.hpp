@@ -161,7 +161,7 @@ namespace peripheral
              */
             bool is_valid;
             /**
-             * @brief 纬度。是一个用字符串表示的小数。
+             * @brief 纬度。度分格式。
              */
             std::string latitude;
             /**
@@ -169,7 +169,7 @@ namespace peripheral
              */
             std::string latitude_semi;
             /**
-             * @brief 精度。是一个用字符串表示的小数。
+             * @brief 精度。度分格式。
              */
             std::string longitude;
             /**
@@ -199,20 +199,6 @@ namespace peripheral
 
             if (_pos.is_valid)
             {
-                // 将经纬度的小数点向左移动两位。
-                auto move_dot = [](std::string& str) {
-                    size_t dot = str.find('.');
-                    assert(dot >= 2);
-                    for (int i = 0; i < 2; i++)
-                    {
-                        str[dot] = str[dot - 1];
-                        dot--;
-                    }
-                    str[dot] = '.';
-                };
-                move_dot(_pos.latitude);
-                move_dot(_pos.longitude);
-
                 _last_valid_pos = _pos;
             }
             _sem.release();
