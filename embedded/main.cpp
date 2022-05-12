@@ -34,7 +34,8 @@ class Main
 {
     peripheral::feedback_message_queue fmq;
     peripheral::bc26 bc26{fmq};
-    peripheral::gps gps{fmq};
+    std::unique_ptr<peripheral::gps> gps{
+        std::make_unique<peripheral::gps>(fmq)};
     peripheral::accel accel{fmq};
 
     using sys_clock = Kernel::Clock;
@@ -85,6 +86,7 @@ class Main
         }
 
         low_power_mode = true;
+        gps.reset();
         // TODO: 关闭 GPS。
     }
     /**
@@ -97,6 +99,8 @@ class Main
         if (low_power_mode)
         {
             utils::debug_printf("[I] Exit lp.\n");
+            // TODO: 如果 GPS 的初始化不是什么都不干，需要补充。
+            gps = std::move(std::make_unique<peripheral::gps>(fmq));
         }
 
         low_power_mode = false;
@@ -104,7 +108,7 @@ class Main
         // TODO: 打开 GPS。
 
         // 请求获得定位信息。
-        gps.request_notify();
+        gps->request_notify();
     }
 
     /**
@@ -269,7 +273,7 @@ class Main
         // 如果是非低功耗模式，则请求下一次 GPS 信息。
         if (!is_low_power_mode())
         {
-            gps.request_notify();
+            gps->request_notify();
         }
     }
 
@@ -283,7 +287,7 @@ public:
             utils::debug_printf("[-] Init bc26.\n");
             bc26.init();
             utils::debug_printf("[-] Init gps.\n");
-            gps.init();
+            gps->init();
         }
 
         // 等待初始化完成。
@@ -295,7 +299,7 @@ public:
 
         // 获取位置并发送。
         // 请求等待 GPS 模块发送第一条定位信息。
-        gps.request_notify();
+        gps->request_notify();
 
         // 消息循环。
         main_loop();
