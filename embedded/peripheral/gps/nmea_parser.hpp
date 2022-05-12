@@ -161,6 +161,42 @@ namespace peripheral
              */
             bool is_valid;
             /**
+             * @brief UTC 时间的秒。
+             *
+             * @note is_valid 为 false 时，时间是也是无效的。
+             */
+            int second;
+            /**
+             * @brief UTC 时间的分。
+             *
+             * @note is_valid 为 false 时，时间是也是无效的。
+             */
+            int minute;
+            /**
+             * @brief UTC 时间的时。
+             *
+             * @note is_valid 为 false 时，时间是也是无效的。
+             */
+            int hour;
+            /**
+             * @brief UTC 时间的日。
+             *
+             * @note is_valid 为 false 时，时间是也是无效的。
+             */
+            int day;
+            /**
+             * @brief UTC 时间的月。
+             *
+             * @note is_valid 为 false 时，时间是也是无效的。
+             */
+            int month;
+            /**
+             * @brief UTC 时间的年。
+             *
+             * @note is_valid 为 false 时，时间是也是无效的。
+             */
+            int year;
+            /**
              * @brief 纬度。度分格式。
              */
             std::string latitude;
@@ -199,6 +235,14 @@ namespace peripheral
 
             if (_pos.is_valid)
             {
+                // 解析时间。
+                _pos.second = std::stoi(frame[1].substr(4, 2));
+                _pos.minute = std::stoi(frame[1].substr(2, 2));
+                _pos.hour = std::stoi(frame[1].substr(0, 2));
+                _pos.day = std::stoi(frame[9].substr(4, 2));
+                _pos.month = std::stoi(frame[9].substr(2, 2));
+                _pos.year = std::stoi(frame[9].substr(0, 2));
+
                 _last_valid_pos = _pos;
             }
             _sem.release();
