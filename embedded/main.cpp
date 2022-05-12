@@ -37,6 +37,66 @@ class Main
     peripheral::gps gps{fmq};
     peripheral::accel accel{fmq};
 
+    using sys_clock = Kernel::Clock;
+    using pos_t = peripheral::nmea_parser::position_t;
+
+    // 定义状态。
+
+    // 是否是低功耗模式。
+    bool low_power_mode = false;
+    // 进入低功耗模式倒计时的开始计时时刻。
+    sys_clock::time_point count_down_start_time = sys_clock::now();
+    // 进入低功耗模式的倒计时预设时间。
+    static constexpr auto count_down_elapse = 3min;
+    // 上次发送的位置信息。
+    pos_t last_pos{};
+
+    /**
+     * @brief 系统是否处于低功耗模式。
+     */
+    bool is_low_power_mode() const
+    {
+        return low_power_mode;
+    }
+    /**
+     * @brief 进入低功耗模式倒计时是否已结束。
+     */
+    bool is_count_down_timeout() const
+    {
+        return sys_clock::now() - count_down_start_time >= count_down_elapse;
+    }
+    /**
+     * @brief 重置倒计时。
+     */
+    void renew_count_down()
+    {
+        count_down_start_time = sys_clock::now();
+    }
+    /**
+     * @brief 进入低功耗模式。
+     * - 修改状态变量。
+     * - 关闭 GPS。
+     */
+    void invoke_low_power_mode()
+    {
+        low_power_mode = true;
+        // TODO: 关闭 GPS。
+    }
+    /**
+     * @brief 退出低功耗模式。如果已经退出，只更新状态。
+     * - 修改状态变量。
+     * - 打开 GPS。
+     */
+    void revoke_low_power_mode()
+    {
+        low_power_mode = false;
+        renew_count_down();
+        // TODO: 打开 GPS。
+
+        // 请求获得定位信息。
+        gps.request_notify();
+    }
+
     /**
      * @brief 等待初始化完成。
      *
@@ -135,14 +195,6 @@ class Main
         }
     }
     /**
-     * @brief 系统是否应该处于低功耗状态。
-     */
-    bool is_low_power_mode() const
-    {
-        // TODO.
-        return true;
-    }
-    /**
      * @brief 数据处理与控制，即状态转移。
      */
     void transfer(const peripheral::feedback_message_queue::message_t& msg)
@@ -150,24 +202,61 @@ class Main
         using fmq_e_t = peripheral::feedback_message_enum_t;
         switch (msg.first)
         {
-            // 非低功耗模式下，进行额外的处理与控制。
+        // 非低功耗模式下，进行额外的处理与控制。
         case fmq_e_t::null:
         {
             on_idle();
             break;
         }
-            // TODO: 实现所有消息的处理。
+        // 收到加速度计提醒，退出低功耗模式。
+        case fmq_e_t::accel_notify:
+        {
+            on_accel_notify();
+            break;
+        }
+        // 收到新地址，发送并更新状态。
+        case fmq_e_t::gps_notify:
+        {
+            auto pos = utils::msg_data<pos_t>(msg);
+            on_gps_notify(pos);
+            break;
+        }
+        // TODO: 实现所有消息的处理。（尤其是 BC26）
         default:
             break;
         }
     }
     /**
-     * @brief 非低功耗模式下，进行额外的处理与控制。
+     * @brief 非低功耗模式下，轮询检查是否进入低功耗模式。
      *
+     * @note 轮询是最简单的，也能保证系统的响应速度最快。
      */
     void on_idle()
     {
-        // TODO.
+        // 此时一定处于非低功耗模式。
+        if (is_count_down_timeout())
+        {
+            // 进入低功耗模式。进入后就一定不会进入 on_idle。
+            invoke_low_power_mode();
+        }
+    }
+    void on_accel_notify()
+    {
+        // 退出低功耗模式。
+        revoke_low_power_mode();
+    }
+    void on_gps_notify(const pos_t& pos)
+    {
+        // TODO: 发送位置。
+
+        // 更新状态。
+        last_pos = pos;
+
+        // 如果是非低功耗模式，则请求下一次 GPS 信息。
+        if (!is_low_power_mode())
+        {
+            gps.request_notify();
+        }
     }
 
 public:
@@ -191,8 +280,8 @@ public:
         }
 
         // 获取位置并发送。
-        // TODO: 考虑定位不会一开始就有，但开机就应该可以控制系统。
-        // 此处的过程还待设计。
+        // 请求等待 GPS 模块发送第一条定位信息。
+        gps.request_notify();
 
         // 消息循环。
         main_loop();
