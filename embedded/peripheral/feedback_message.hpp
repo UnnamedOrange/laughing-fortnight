@@ -115,6 +115,12 @@ namespace peripheral
          */
         gps_message_begin,
         /**
+         * @brief GPS 模块有新位置的通知。
+         *
+         * @param nmea_parser::position_t 位置信息。
+         */
+        gps_notify,
+        /**
          * @brief GPS 模块消息的终止点。不包含初始化消息。
          */
         gps_message_end,

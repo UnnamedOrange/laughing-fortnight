@@ -19,6 +19,10 @@ namespace peripheral
          * @brief 初始化。
          */
         init,
+        /**
+         * @brief 请求在位置信息更新时通知外部队列。
+         */
+        request_notify,
 
         _message_end,
         /**
