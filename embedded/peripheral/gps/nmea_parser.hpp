@@ -239,9 +239,9 @@ namespace peripheral
                 _pos.second = std::stoi(frame[1].substr(4, 2));
                 _pos.minute = std::stoi(frame[1].substr(2, 2));
                 _pos.hour = std::stoi(frame[1].substr(0, 2));
-                _pos.day = std::stoi(frame[9].substr(4, 2));
+                _pos.day = std::stoi(frame[9].substr(0, 2));
                 _pos.month = std::stoi(frame[9].substr(2, 2));
-                _pos.year = std::stoi(frame[9].substr(0, 2));
+                _pos.year = std::stoi(frame[9].substr(4, 2));
 
                 _last_valid_pos = _pos;
             }
