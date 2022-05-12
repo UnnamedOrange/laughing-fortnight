@@ -79,6 +79,11 @@ class Main
      */
     void invoke_low_power_mode()
     {
+        if (!low_power_mode)
+        {
+            utils::debug_printf("[I] Enter lp.\n");
+        }
+
         low_power_mode = true;
         // TODO: 关闭 GPS。
     }
@@ -89,6 +94,11 @@ class Main
      */
     void revoke_low_power_mode()
     {
+        if (low_power_mode)
+        {
+            utils::debug_printf("[I] Exit lp.\n");
+        }
+
         low_power_mode = false;
         renew_count_down();
         // TODO: 打开 GPS。
@@ -242,11 +252,15 @@ class Main
     }
     void on_accel_notify()
     {
+        utils::debug_printf("[I] accel notify.\n");
+
         // 退出低功耗模式。
         revoke_low_power_mode();
     }
     void on_gps_notify(const pos_t& pos)
     {
+        utils::debug_printf("[I] gps notify.\n");
+
         // TODO: 发送位置。
 
         // 更新状态。
