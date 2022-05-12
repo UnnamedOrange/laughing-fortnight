@@ -11,9 +11,10 @@
 
 #include "mbed.h"
 
+#include <algorithm>
+#include <deque>
 #include <functional>
 #include <memory>
-#include <queue>
 #include <type_traits>
 #include <utility>
 
@@ -38,7 +39,7 @@ namespace peripheral
         /**
          * @brief 消息队列。first 是 id，second 是 data。
          */
-        std::queue<std::pair<int, std::shared_ptr<void>>> _queue;
+        std::deque<std::pair<int, std::shared_ptr<void>>> _queue;
         /**
          * @brief 子线程是否需要退出。
          */
@@ -109,7 +110,7 @@ namespace peripheral
                         break;
                     // 等待结束后，线程获得锁，仅子线程访问队列。
                     message = _queue.front();
-                    _queue.pop();
+                    _queue.pop_front();
                     // ScopedMutexLock 析构函数自动释放锁。
                 }
 
@@ -148,7 +149,7 @@ namespace peripheral
             // 获取锁。
             rtos::ScopedMutexLock lock(_mutex_queue);
             // 加锁后，仅主线程访问队列。shared_ptr 的引用计数是线程安全的。
-            _queue.push(std::make_pair(id, std::move(data)));
+            _queue.push_back(std::make_pair(id, std::move(data)));
             // 发送信号。
             _cond_queue.notify_one();
             // ScopedMutexLock 析构函数自动释放锁。
@@ -162,6 +163,23 @@ namespace peripheral
         {
             rtos::ScopedMutexLock lock(_mutex_queue);
             return _queue.empty();
+        }
+        /**
+         * @brief 查询消息队列中某类消息的数量。
+         *
+         * @note 该函数是线程安全的。
+         *
+         * @param id 程序员自定义的消息 ID。
+         * @return int 消息数量。
+         */
+        int count(int id)
+        {
+            rtos::ScopedMutexLock lock(_mutex_queue);
+            return std::count_if(
+                _queue.begin(), _queue.end(),
+                [&id](const std::pair<int, std::shared_ptr<void>>& msg) {
+                    return msg.first == id;
+                });
         }
     };
 } // namespace peripheral

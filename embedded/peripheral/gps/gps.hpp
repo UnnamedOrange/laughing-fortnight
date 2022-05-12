@@ -146,7 +146,11 @@ namespace peripheral
          */
         void request_notify()
         {
-            push(static_cast<int>(gps_message_enum_t::request_notify), nullptr);
+            if (!count(static_cast<int>(gps_message_enum_t::request_notify)))
+            {
+                push(static_cast<int>(gps_message_enum_t::request_notify),
+                     nullptr);
+            }
         }
 
         /**
