@@ -57,6 +57,15 @@ namespace peripheral
          */
         init,
 
+        /**
+         * @brief 发送 AT+QMTCFG= 指令。配置 MQTT 可选参数。
+         *
+         * @param std::string 类型。不包含引号。例如 dataformat。
+         * @param std::vector<std::string>
+         * 参数列表。各参数将会被逗号隔开，需要手动添加引号。
+         */
+        send_at_qmtcfg,
+
         _message_end,
         /**
          * @brief 被定义的消息的总数。

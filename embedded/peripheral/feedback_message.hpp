@@ -110,6 +110,12 @@ namespace peripheral
          */
         bc26_send_at_cesq,
         /**
+         * @brief BC26 模块 send_at_qmtcfg 的反馈消息。
+         *
+         * @param bool 是否成功收到 OK。
+         */
+        bc26_send_at_qmtcfg,
+        /**
          * @brief BC26 模块消息的终止点。不包含初始化消息。
          */
         bc26_message_end,

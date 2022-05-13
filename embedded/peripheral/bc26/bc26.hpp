@@ -14,6 +14,7 @@
 #include <chrono>
 #include <string>
 #include <tuple>
+#include <vector>
 
 #include "../command_receiver_serial.hpp"
 #include "../command_sender_serial.hpp"
@@ -93,6 +94,14 @@ namespace peripheral
             case bc26_message_t::init:
             {
                 on_init(*std::static_pointer_cast<int>(data));
+                break;
+            }
+            case bc26_message_t::send_at_qmtcfg:
+            {
+                using param_type =
+                    std::tuple<std::string, std::vector<std::string>>;
+                const auto& param = *std::static_pointer_cast<param_type>(data);
+                on_send_at_qmtcfg(std::get<0>(param), std::get<1>(param));
                 break;
             }
             default:
@@ -384,6 +393,40 @@ namespace peripheral
             on_init(max_retry, _external_fmq);
         }
 
+        /**
+         * @brief 发送 AT+QMTCFG= 指令。配置 MQTT 可选参数。
+         *
+         * @param type 类型。不包含引号。例如 dataformat。
+         * @param params 参数列表。各参数将会被逗号隔开，需要手动添加引号。
+         */
+        void on_send_at_qmtcfg(const std::string& type,
+                               const std::vector<std::string>& params,
+                               _fmq_t& fmq)
+        {
+            std::string cmd = "AT+QMTCFG=";
+            cmd += '"' + type + '"';
+            for (const auto& param : params)
+                cmd += ',' + param;
+            cmd += "\r\n";
+
+            utils::debug_printf("[-] %s", cmd.c_str());
+            sender.send_command(cmd);
+            std::string received_str = receiver.receive_command(300ms);
+            utils::debug_printf("%s", received_str.c_str());
+
+            bool is_success = received_str.find("OK") != std::string::npos;
+            utils::debug_printf("[%c] %s", is_success ? 'D' : 'F', is_success,
+                                cmd.c_str());
+            // 参见 feedback_message_enum_t::bc26_send_at_qmtcfg。
+            fmq.post_message(_fmq_e_t::bc26_send_at_qmtcfg,
+                             std::make_shared<bool>(is_success));
+        }
+        void on_send_at_qmtcfg(const std::string& type,
+                               const std::vector<std::string>& params)
+        {
+            on_send_at_qmtcfg(type, params, _external_fmq);
+        }
+
         // 以下函数是主模块的接口，均在主线程中运行。
     public:
         /**
@@ -458,6 +501,21 @@ namespace peripheral
         {
             post_message(static_cast<int>(bc26_message_t::init),
                          std::make_shared<int>(max_retry));
+        }
+
+        /**
+         * @brief 向子模块发送消息。发送 AT+QMTCFG= 指令。配置 MQTT 可选参数。
+         *
+         * @param type 类型。不包含引号。例如 dataformat。
+         * @param params 参数列表。各参数将会被逗号隔开，需要手动添加引号。
+         */
+        void send_at_qmtcfg(const std::string& type,
+                            const std::vector<std::string>& params)
+        {
+            using param_type =
+                std::tuple<std::string, std::vector<std::string>>;
+            post_message(static_cast<int>(bc26_message_t::send_at_qmtcfg),
+                         std::make_shared<param_type>(type, params));
         }
     };
 } // namespace peripheral
