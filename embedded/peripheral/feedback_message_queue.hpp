@@ -12,10 +12,10 @@
 
 #include "mbed.h"
 
-#include <deque>
-#include <utility>
+#include <type_traits>
 
 #include "feedback_message.hpp"
+#include "message_queue.hpp"
 
 namespace peripheral
 {
@@ -25,7 +25,7 @@ namespace peripheral
      *
      * @note 这个类是线程安全的。
      */
-    class feedback_message_queue
+    class feedback_message_queue : protected message_queue
     {
     public:
         /**
@@ -38,12 +38,11 @@ namespace peripheral
             std::pair<feedback_message_enum_t, std::shared_ptr<void>>;
 
     private:
-        // 消息队列的互斥体。
-        rtos::Mutex _mutex_queue;
-        // 消息队列的条件变量。
-        rtos::ConditionVariable _cond_queue{_mutex_queue};
-        // 消息队列。
-        std::deque<message_t> _queue;
+        static message_t raw_to_msg(raw_message_t&& raw)
+        {
+            return {static_cast<feedback_message_enum_t>(raw.first),
+                    std::move(raw.second)};
+        }
 
     public:
         /**
@@ -55,9 +54,7 @@ namespace peripheral
         void post_message(feedback_message_enum_t id,
                           std::shared_ptr<void> data)
         {
-            rtos::ScopedMutexLock lock{_mutex_queue};
-            _queue.push_back({id, data});
-            _cond_queue.notify_one();
+            message_queue::post_message(static_cast<int>(id), data);
         }
         /**
          * @brief 向消息队列发送消息。
@@ -69,21 +66,7 @@ namespace peripheral
         void post_message_unique(feedback_message_enum_t id,
                                  std::shared_ptr<void> data)
         {
-            rtos::ScopedMutexLock lock{_mutex_queue};
-            bool _has_found = false;
-            // 倒序查找最晚的消息。
-            for (auto it = _queue.rbegin(); it != _queue.rend(); it++)
-            {
-                if (it->first == id) // 找到了这种类型的消息。
-                {
-                    _has_found = true;
-                    it->second = data; // 将其额外数据覆盖。
-                    break;
-                }
-            }
-
-            if (!_has_found) // 如果没有找到，正常发送。
-                post_message(id, data);
+            message_queue::post_message_unique(static_cast<int>(id), data);
         }
 
     public:
@@ -94,14 +77,7 @@ namespace peripheral
          */
         message_t get_message()
         {
-            message_t message;
-            {
-                rtos::ScopedMutexLock lock(_mutex_queue);
-                _cond_queue.wait([this]() { return !_queue.empty(); });
-                message = _queue.front();
-                _queue.pop_front();
-            }
-            return message;
+            return raw_to_msg(message_queue::get_message());
         }
         /**
          * @brief 阻塞地获取消息队列中的消息。如果队列中没有范围内的消息则等待。
@@ -113,30 +89,8 @@ namespace peripheral
         message_t get_message(feedback_message_enum_t min_message,
                               feedback_message_enum_t max_message)
         {
-            message_t message;
-            {
-                rtos::ScopedMutexLock lock(_mutex_queue);
-                _cond_queue.wait([this, &min_message, &max_message]() {
-                    return std::count_if(
-                        _queue.rbegin(),
-                        _queue.rend(), // 倒序以加快新消息的查找。
-                        [&](const message_t& msg) {
-                            return min_message <= msg.first &&
-                                   msg.first <= max_message;
-                        });
-                });
-                // 顺序查找最早的消息。
-                for (auto it = _queue.begin(); it != _queue.end(); it++)
-                {
-                    if (min_message <= it->first && it->first <= max_message)
-                    {
-                        message = *it;
-                        _queue.erase(it);
-                        break;
-                    }
-                }
-            }
-            return message;
+            return raw_to_msg(message_queue::get_message(
+                static_cast<int>(min_message), static_cast<int>(max_message)));
         }
         /**
          * @brief 非阻塞地获取消息队列中的消息。
@@ -146,12 +100,7 @@ namespace peripheral
          */
         message_t peek_message()
         {
-            rtos::ScopedMutexLock lock{_mutex_queue};
-            if (_queue.empty())
-                return {feedback_message_enum_t::null, nullptr};
-            auto message = _queue.front();
-            _queue.pop_front();
-            return message;
+            return raw_to_msg(message_queue::peek_message());
         }
         /**
          * @brief 非阻塞地获取消息队列中的消息。
@@ -164,19 +113,8 @@ namespace peripheral
         message_t peek_message(feedback_message_enum_t min_message,
                                feedback_message_enum_t max_message)
         {
-            rtos::ScopedMutexLock lock{_mutex_queue};
-            message_t message{feedback_message_enum_t::null, nullptr};
-            // 顺序查找最早的消息。
-            for (auto it = _queue.begin(); it != _queue.end(); it++)
-            {
-                if (min_message <= it->first && it->first <= max_message)
-                {
-                    message = *it;
-                    _queue.erase(it);
-                    break;
-                }
-            }
-            return message;
+            return raw_to_msg(message_queue::peek_message(
+                static_cast<int>(min_message), static_cast<int>(max_message)));
         }
     };
 } // namespace peripheral
