@@ -20,10 +20,52 @@ namespace peripheral
         _message_begin = null,
 
         /**
-         * @brief BC26 模块消息的起始点。
+         * @brief 各模块初始化消息的起始点。
+         */
+        init_message_begin,
+        /**
+         * @brief 加速度计初始化的反馈信息。
+         *
+         * @param bool 是否初始化成功。
+         */
+        accel_init,
+        /**
+         * @brief BC26 模块综合初始化的反馈信息。
+         *
+         * @param bool 是否初始化成功。
+         * @param string 卡号。
+         * @param bool 是否已激活。
+         * @param int 信号强度。
+         */
+        bc26_init,
+        /**
+         * @brief GPS 模块初始化的反馈信息。
+         *
+         * @param bool 是否初始化成功。
+         */
+        gps_init,
+        /**
+         * @brief 各模块初始化消息的终止点。
+         */
+        init_message_end,
+
+        /**
+         * @brief 加速度计模块消息的起始点。不包含初始化消息。
+         */
+        accel_message_begin,
+        /**
+         * @brief 加速度计被移动的通知。
+         */
+        accel_notify,
+        /**
+         * @brief 加速度计模块消息的终止点。不包含初始化消息。
+         */
+        accel_message_end,
+
+        /**
+         * @brief BC26 模块消息的起始点。不包含初始化消息。
          */
         bc26_message_begin,
-
         /**
          * @brief BC26 模块 send_at 的反馈消息。
          *
@@ -63,53 +105,25 @@ namespace peripheral
          * @param int 信号强度。
          */
         bc26_send_at_cesq,
-
         /**
-         * @brief BC26 模块综合初始化的反馈信息。
-         *
-         * @param bool 是否初始化成功。
-         * @param string 卡号。
-         * @param bool 是否已激活。
-         * @param int 信号强度。
-         */
-        bc26_init,
-
-        /**
-         * @brief BC26 模块消息的终止点。
+         * @brief BC26 模块消息的终止点。不包含初始化消息。
          */
         bc26_message_end,
 
         /**
-         * @brief GPS 模块消息的起始点。
+         * @brief GPS 模块消息的起始点。不包含初始化消息。
          */
         gps_message_begin,
-
         /**
-         * @brief GPS 模块消息的终止点。
+         * @brief GPS 模块有新位置的通知。
+         *
+         * @param nmea_parser::position_t 位置信息。
+         */
+        gps_notify,
+        /**
+         * @brief GPS 模块消息的终止点。不包含初始化消息。
          */
         gps_message_end,
-
-        /**
-         * @brief 加速度计模块消息的起始点。
-         */
-        accel_message_begin,
-
-        /**
-         * @brief 加速度计初始化的反馈信息。
-         *
-         * @param bool 是否初始化成功。
-         */
-        accel_init,
-
-        /**
-         * @brief 加速度计被移动的通知。
-         */
-        accel_notify,
-
-        /**
-         * @brief 加速度计模块消息的终止点。
-         */
-        accel_message_end,
 
         _message_end,
     };

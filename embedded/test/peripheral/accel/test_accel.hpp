@@ -19,6 +19,7 @@
 #include <peripheral/feedback_message_queue.hpp>
 #include <utils/app.hpp>
 #include <utils/debug.hpp>
+#include <utils/msg_data.hpp>
 
 namespace test
 {
@@ -56,8 +57,7 @@ namespace test
                     {
                     case fmq_e_t::accel_init:
                     {
-                        bool is_success =
-                            *std::static_pointer_cast<bool>(msg.second);
+                        bool is_success = utils::msg_data<bool>(msg);
                         if (is_success)
                             utils::debug_printf("[D] Init accel.\n");
                         else

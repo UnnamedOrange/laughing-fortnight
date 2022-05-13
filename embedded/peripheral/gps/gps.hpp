@@ -41,12 +41,16 @@ namespace peripheral
     private:
         nmea_parser parser{receiver};
 
+    private:
+        bool should_exit{};
+
     public:
         gps(_fmq_t& fmq) : _external_fmq(fmq)
         {
         }
         ~gps()
         {
+            should_exit = true;
             descendant_exit();
         }
 
@@ -57,6 +61,16 @@ namespace peripheral
             descendant_callback_begin();
             switch (static_cast<gps_message_enum_t>(id))
             {
+            case gps_message_enum_t::init:
+            {
+                on_init();
+                break;
+            }
+            case gps_message_enum_t::request_notify:
+            {
+                on_request_notify();
+                break;
+            }
             default:
             {
                 break;
@@ -64,9 +78,78 @@ namespace peripheral
             }
             descendant_callback_end();
         }
+        /**
+         * @brief 初始化。
+         */
+        void on_init(_fmq_t& fmq)
+        {
+            // TODO: 补充 GPS 初始化的流程。
+            bool is_success = true;
+
+            // 参见 feedback_message_enum_t::gps_init。
+            fmq.post_message(_fmq_e_t::gps_init,
+                             std::make_shared<bool>(is_success));
+        }
+        void on_init()
+        {
+            on_init(_external_fmq);
+        }
+        /**
+         * @brief 请求在位置信息更新时通知外部队列。
+         *
+         * @note 该消息会阻塞队列。
+         *
+         * @todo 尽可能避免该消息阻塞队列。
+         */
+        void on_request_notify(_fmq_t& fmq)
+        {
+            auto previous = parser.get_last_valid_position();
+            while (true)
+            {
+                using namespace std::literals;
+
+                // 检查是否应该退出，避免阻塞析构函数。
+                if (should_exit)
+                    break;
+
+                // 等待内部刷新。
+                rtos::ThisThread::sleep_for(1s);
+                auto current = parser.get_last_valid_position();
+                // 判断这两个对象不同用一个较弱的条件即可。
+                if (current.is_valid && (current.second != previous.second ||
+                                         current.minute != previous.minute))
+                {
+                    // 参见 feedback_message_enum_t::gps_notify。
+                    fmq.post_message(
+                        _fmq_e_t::gps_notify,
+                        std::make_shared<nmea_parser::position_t>(current));
+                    break;
+                }
+            }
+        }
+        void on_request_notify()
+        {
+            on_request_notify(_external_fmq);
+        }
 
         // 以下函数是主模块的接口，均在主线程中运行。
     public:
+        /**
+         * @brief 初始化。
+         */
+        void init()
+        {
+            post_message(static_cast<int>(gps_message_enum_t::init), nullptr);
+        }
+        /**
+         * @brief 请求在位置信息更新时通知外部队列。
+         */
+        void request_notify()
+        {
+            post_message_unique(
+                static_cast<int>(gps_message_enum_t::request_notify), nullptr);
+        }
+
         /**
          * @brief 获取当前的位置信息。
          *
@@ -80,7 +163,6 @@ namespace peripheral
         {
             return parser.get_current_position();
         }
-
         /**
          * @brief 获取最后一次有效的位置信息。
          *

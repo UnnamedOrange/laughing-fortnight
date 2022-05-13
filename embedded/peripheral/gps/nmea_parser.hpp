@@ -161,7 +161,43 @@ namespace peripheral
              */
             bool is_valid;
             /**
-             * @brief 纬度。是一个用字符串表示的小数。
+             * @brief UTC 时间的秒。
+             *
+             * @note is_valid 为 false 时，时间是也是无效的。
+             */
+            int second;
+            /**
+             * @brief UTC 时间的分。
+             *
+             * @note is_valid 为 false 时，时间是也是无效的。
+             */
+            int minute;
+            /**
+             * @brief UTC 时间的时。
+             *
+             * @note is_valid 为 false 时，时间是也是无效的。
+             */
+            int hour;
+            /**
+             * @brief UTC 时间的日。
+             *
+             * @note is_valid 为 false 时，时间是也是无效的。
+             */
+            int day;
+            /**
+             * @brief UTC 时间的月。
+             *
+             * @note is_valid 为 false 时，时间是也是无效的。
+             */
+            int month;
+            /**
+             * @brief UTC 时间的年。
+             *
+             * @note is_valid 为 false 时，时间是也是无效的。
+             */
+            int year;
+            /**
+             * @brief 纬度。度分格式。
              */
             std::string latitude;
             /**
@@ -169,7 +205,7 @@ namespace peripheral
              */
             std::string latitude_semi;
             /**
-             * @brief 精度。是一个用字符串表示的小数。
+             * @brief 精度。度分格式。
              */
             std::string longitude;
             /**
@@ -199,19 +235,13 @@ namespace peripheral
 
             if (_pos.is_valid)
             {
-                // 将经纬度的小数点向左移动两位。
-                auto move_dot = [](std::string& str) {
-                    size_t dot = str.find('.');
-                    assert(dot >= 2);
-                    for (int i = 0; i < 2; i++)
-                    {
-                        str[dot] = str[dot - 1];
-                        dot--;
-                    }
-                    str[dot] = '.';
-                };
-                move_dot(_pos.latitude);
-                move_dot(_pos.longitude);
+                // 解析时间。
+                _pos.second = std::stoi(frame[1].substr(4, 2));
+                _pos.minute = std::stoi(frame[1].substr(2, 2));
+                _pos.hour = std::stoi(frame[1].substr(0, 2));
+                _pos.day = std::stoi(frame[9].substr(0, 2));
+                _pos.month = std::stoi(frame[9].substr(2, 2));
+                _pos.year = std::stoi(frame[9].substr(4, 2));
 
                 _last_valid_pos = _pos;
             }

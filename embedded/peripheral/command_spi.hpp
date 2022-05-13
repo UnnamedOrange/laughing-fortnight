@@ -26,11 +26,11 @@ namespace peripheral
      *
      * @note 这个类不是线程安全的。
      *
-     * @tparam frequency SPI 的频率。默认为 1 MHz。
+     * @tparam frequency SPI 的频率。默认为 100 kHz。
      * @tparam bits SPI 的位宽。默认为 8。
      * @tparam mode SPI 的工作模式。默认为 3。
      */
-    template <int frequency = 1000000, int bits = 8, int mode = 3>
+    template <int frequency = 100000, int bits = 8, int mode = 3>
     class command_spi
     {
     private:
