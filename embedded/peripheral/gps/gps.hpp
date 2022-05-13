@@ -139,18 +139,15 @@ namespace peripheral
          */
         void init()
         {
-            push(static_cast<int>(gps_message_enum_t::init), nullptr);
+            post_message(static_cast<int>(gps_message_enum_t::init), nullptr);
         }
         /**
          * @brief 请求在位置信息更新时通知外部队列。
          */
         void request_notify()
         {
-            if (!count(static_cast<int>(gps_message_enum_t::request_notify)))
-            {
-                push(static_cast<int>(gps_message_enum_t::request_notify),
-                     nullptr);
-            }
+            post_message_unique(
+                static_cast<int>(gps_message_enum_t::request_notify), nullptr);
         }
 
         /**

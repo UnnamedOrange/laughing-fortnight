@@ -364,8 +364,8 @@ namespace peripheral
          */
         void send_at(int max_retry = 10)
         {
-            push(static_cast<int>(bc26_message_t::send_at),
-                 std::make_shared<int>(max_retry));
+            post_message(static_cast<int>(bc26_message_t::send_at),
+                         std::make_shared<int>(max_retry));
         }
         /**
          * @brief 向子模块发送消息。发送 ATE<echo> 指令。打开或关闭回显。
@@ -374,8 +374,8 @@ namespace peripheral
          */
         void send_ate(bool is_echo = false)
         {
-            push(static_cast<int>(bc26_message_t::send_ate),
-                 std::make_shared<bool>(is_echo));
+            post_message(static_cast<int>(bc26_message_t::send_ate),
+                         std::make_shared<bool>(is_echo));
         }
         /**
          * @brief 向子模块发送消息。发送 AT+CFUN=<mode> 指令。设置功能模式。
@@ -384,29 +384,32 @@ namespace peripheral
          */
         void send_at_cfun_set(int mode = 1)
         {
-            push(static_cast<int>(bc26_message_t::send_at_cfun_set),
-                 std::make_shared<int>(mode));
+            post_message(static_cast<int>(bc26_message_t::send_at_cfun_set),
+                         std::make_shared<int>(mode));
         }
         /**
          * @brief 向子模块发送消息。发送 AT+CIMI 指令。查询卡号。
          */
         void send_at_cimi()
         {
-            push(static_cast<int>(bc26_message_t::send_at_cimi), nullptr);
+            post_message(static_cast<int>(bc26_message_t::send_at_cimi),
+                         nullptr);
         }
         /**
          * @brief 向子模块发送消息。发送 AT_CGATT? 指令。查询激活状态。
          */
         void send_at_cgatt_get()
         {
-            push(static_cast<int>(bc26_message_t::send_at_cgatt_get), nullptr);
+            post_message(static_cast<int>(bc26_message_t::send_at_cgatt_get),
+                         nullptr);
         }
         /**
          * @brief 向子模块发送消息。发送 AT+CESQ 指令。获取信号质量。
          */
         void send_at_cesq()
         {
-            push(static_cast<int>(bc26_message_t::send_at_cesq), nullptr);
+            post_message(static_cast<int>(bc26_message_t::send_at_cesq),
+                         nullptr);
         }
 
         /**
@@ -416,8 +419,8 @@ namespace peripheral
          */
         void init(int max_retry = 3)
         {
-            push(static_cast<int>(bc26_message_t::init),
-                 std::make_shared<int>(max_retry));
+            post_message(static_cast<int>(bc26_message_t::init),
+                         std::make_shared<int>(max_retry));
         }
     };
 } // namespace peripheral

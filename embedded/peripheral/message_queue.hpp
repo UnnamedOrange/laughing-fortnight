@@ -39,16 +39,50 @@ namespace peripheral
         rtos::ConditionVariable _cond_queue{_mutex_queue};
         // 消息队列。
         std::deque<raw_message_t> _queue;
+        // 是否需要退出。
+        bool _should_exit{};
+
+    protected:
+        void exit()
+        {
+            _should_exit = true;
+            // 等待消息队列不再被访问。
+            rtos::ScopedMutexLock lock{_mutex_queue};
+            // 通知等待中的条件变量退出。
+            _cond_queue.notify_one();
+        }
+
+    public:
+        virtual ~message_queue()
+        {
+            exit();
+        }
+
+    public:
+        /**
+         * @brief 消息队列是否为空。
+         */
+        bool empty()
+        {
+            if (_should_exit)
+                return true;
+
+            rtos::ScopedMutexLock lock{_mutex_queue};
+            return _queue.empty();
+        }
 
     public:
         /**
          * @brief 向消息队列发送消息。
          *
-         * @param id 消息 id。
+         * @param id 消息 id。0 表示退出，不要发送 0。
          * @param data 消息的额外数据。
          */
         void post_message(int id, std::shared_ptr<void> data)
         {
+            if (_should_exit)
+                return;
+
             rtos::ScopedMutexLock lock{_mutex_queue};
             _queue.push_back({id, data});
             _cond_queue.notify_one();
@@ -57,11 +91,14 @@ namespace peripheral
          * @brief 向消息队列发送消息。
          * 如果这种类型的消息已经存在，则覆盖最晚的消息。
          *
-         * @param id 消息 id。
+         * @param id 消息 id。0 表示退出，不要发送 0。
          * @param data 消息的额外数据。
          */
         void post_message_unique(int id, std::shared_ptr<void> data)
         {
+            if (_should_exit)
+                return;
+
             rtos::ScopedMutexLock lock{_mutex_queue};
             bool _has_found = false;
             // 倒序查找最晚的消息。
@@ -87,10 +124,16 @@ namespace peripheral
          */
         raw_message_t get_message()
         {
+            if (_should_exit)
+                return {0, nullptr};
+
             raw_message_t message;
             {
                 rtos::ScopedMutexLock lock(_mutex_queue);
-                _cond_queue.wait([this]() { return !_queue.empty(); });
+                _cond_queue.wait(
+                    [this]() { return _should_exit || !_queue.empty(); });
+                if (_should_exit)
+                    return {0, nullptr};
                 message = _queue.front();
                 _queue.pop_front();
             }
@@ -105,18 +148,24 @@ namespace peripheral
          */
         raw_message_t get_message(int min_message, int max_message)
         {
+            if (_should_exit)
+                return {0, nullptr};
+
             raw_message_t message;
             {
                 rtos::ScopedMutexLock lock(_mutex_queue);
                 _cond_queue.wait([this, &min_message, &max_message]() {
-                    return std::count_if(
-                        _queue.rbegin(),
-                        _queue.rend(), // 倒序以加快新消息的查找。
-                        [&](const raw_message_t& msg) {
-                            return min_message <= msg.first &&
-                                   msg.first <= max_message;
-                        });
+                    return _should_exit ||
+                           std::count_if(
+                               _queue.rbegin(),
+                               _queue.rend(), // 倒序以加快新消息的查找。
+                               [&](const raw_message_t& msg) {
+                                   return min_message <= msg.first &&
+                                          msg.first <= max_message;
+                               });
                 });
+                if (_should_exit)
+                    return {0, nullptr};
                 // 顺序查找最早的消息。
                 for (auto it = _queue.begin(); it != _queue.end(); it++)
                 {
@@ -138,6 +187,9 @@ namespace peripheral
          */
         raw_message_t peek_message()
         {
+            if (_should_exit)
+                return {0, nullptr};
+
             rtos::ScopedMutexLock lock{_mutex_queue};
             if (_queue.empty())
                 return {0, nullptr};
@@ -155,6 +207,9 @@ namespace peripheral
          */
         raw_message_t peek_message(int min_message, int max_message)
         {
+            if (_should_exit)
+                return {0, nullptr};
+
             rtos::ScopedMutexLock lock{_mutex_queue};
             raw_message_t message{0, nullptr};
             // 顺序查找最早的消息。

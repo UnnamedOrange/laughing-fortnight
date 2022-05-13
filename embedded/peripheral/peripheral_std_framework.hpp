@@ -18,6 +18,7 @@
 #include <type_traits>
 #include <utility>
 
+#include "message_queue.hpp"
 #include "peripheral_thread.hpp"
 
 namespace peripheral
@@ -25,25 +26,12 @@ namespace peripheral
     /**
      * @brief 外设子模块的标准框架。是一个带有消息队列的子线程。
      */
-    class peripheral_std_framework : public peripheral_thread
+    class peripheral_std_framework : public peripheral_thread,
+                                     public message_queue
     {
     private:
-        /**
-         * @brief 消息队列的互斥体。
-         */
-        rtos::Mutex _mutex_queue;
-        /**
-         * @brief 消息队列的条件变量。
-         */
-        rtos::ConditionVariable _cond_queue{_mutex_queue};
-        /**
-         * @brief 消息队列。first 是 id，second 是 data。
-         */
-        std::deque<std::pair<int, std::shared_ptr<void>>> _queue;
-        /**
-         * @brief 子线程是否需要退出。
-         */
-        bool _should_exit{};
+        using message_queue::get_message;
+        using message_queue::peek_message;
 
     public:
         peripheral_std_framework()
@@ -52,12 +40,9 @@ namespace peripheral
         }
         ~peripheral_std_framework()
         {
+            // 逻辑上退出消息队列，可以认为队列总是空。
+            message_queue::exit();
             // 通知子线程退出。
-            {
-                rtos::ScopedMutexLock lock(_mutex_queue);
-                _should_exit = true;
-                _cond_queue.notify_one();
-            }
             peripheral_thread::join();
         }
 
@@ -96,23 +81,9 @@ namespace peripheral
         {
             while (true)
             {
-                std::decay<decltype(_queue.front())>::type message;
-                {
-                    // 信号接收流程：获取锁，检查条件表达式，满足条件时发送信号，释放锁。
-
-                    // 获取锁。
-                    rtos::ScopedMutexLock lock(_mutex_queue);
-                    // 检查条件表达式。检查时锁会被放开，线程进入等待条件变量的状态。
-                    _cond_queue.wait(
-                        [this]() { return _should_exit || !_queue.empty(); });
-                    // 需要退出时直接退出。实际中不会发生，只是为了让测试正常进行。
-                    if (_should_exit)
-                        break;
-                    // 等待结束后，线程获得锁，仅子线程访问队列。
-                    message = _queue.front();
-                    _queue.pop_front();
-                    // ScopedMutexLock 析构函数自动释放锁。
-                }
+                auto message = get_message();
+                if (!message.first) // 说明消息队列已退出。
+                    break;
 
                 // 如果子类已经退出，则不执行消息处理。
                 if (_descendant_exit)
@@ -132,54 +103,5 @@ namespace peripheral
          * @param data 指向程序员自定义数据结构的指针。
          */
         virtual void on_message(int id, std::shared_ptr<void> data) = 0;
-
-    public:
-        /**
-         * @brief 向消息队列中添加消息。
-         *
-         * @note 在主线程中调用该函数。也可以在子线程内部调用该函数。
-         *
-         * @param id 程序员自定义的消息 ID。
-         * @param data 指向程序员自定义数据结构的指针。
-         */
-        void push(int id, std::shared_ptr<void> data)
-        {
-            // 信号发送流程：获取锁，检查条件表达式，满足条件时发送信号，释放锁。
-
-            // 获取锁。
-            rtos::ScopedMutexLock lock(_mutex_queue);
-            // 加锁后，仅主线程访问队列。shared_ptr 的引用计数是线程安全的。
-            _queue.push_back(std::make_pair(id, std::move(data)));
-            // 发送信号。
-            _cond_queue.notify_one();
-            // ScopedMutexLock 析构函数自动释放锁。
-        }
-        /**
-         * @brief 消息队列是否为空。
-         *
-         * @note 该函数是线程安全的。
-         */
-        bool empty()
-        {
-            rtos::ScopedMutexLock lock(_mutex_queue);
-            return _queue.empty();
-        }
-        /**
-         * @brief 查询消息队列中某类消息的数量。
-         *
-         * @note 该函数是线程安全的。
-         *
-         * @param id 程序员自定义的消息 ID。
-         * @return int 消息数量。
-         */
-        int count(int id)
-        {
-            rtos::ScopedMutexLock lock(_mutex_queue);
-            return std::count_if(
-                _queue.begin(), _queue.end(),
-                [&id](const std::pair<int, std::shared_ptr<void>>& msg) {
-                    return msg.first == id;
-                });
-        }
     };
 } // namespace peripheral

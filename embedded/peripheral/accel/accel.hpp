@@ -162,7 +162,7 @@ namespace peripheral
          */
         void init()
         {
-            push(static_cast<int>(accel_message_enum_t::init), nullptr);
+            post_message(static_cast<int>(accel_message_enum_t::init), nullptr);
         }
         /**
          * @brief 等待中断。如果没有收到中断，将会一直阻塞。
@@ -171,7 +171,8 @@ namespace peripheral
          */
         void wait_int()
         {
-            push(static_cast<int>(accel_message_enum_t::wait_int), nullptr);
+            post_message_unique(
+                static_cast<int>(accel_message_enum_t::wait_int), nullptr);
         }
     };
 } // namespace peripheral
