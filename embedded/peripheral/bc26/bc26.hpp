@@ -302,10 +302,9 @@ namespace peripheral
             for (int i = 0; i < max_retry; i++)
             {
                 bool once_success = false;
+                using namespace std::literals;
                 do
                 {
-                    using namespace std::literals;
-
                     on_send_at(10, internal_fmq);
                     msg = internal_fmq.get_message();
                     assert(msg.first == _fmq_e_t::bc26_send_at);
@@ -369,6 +368,10 @@ namespace peripheral
                     any_success = true;
                     break;
                 }
+
+                // 等待 5 s，保证之后初始化成功。
+                if (i + 1 != max_retry)
+                    rtos::ThisThread::sleep_for(5s);
             }
 
             fmq.post_message(
@@ -451,7 +454,7 @@ namespace peripheral
          *
          * @param max_retry 最大重试次数。
          */
-        void init(int max_retry = 3)
+        void init(int max_retry = 5)
         {
             post_message(static_cast<int>(bc26_message_t::init),
                          std::make_shared<int>(max_retry));
