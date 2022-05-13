@@ -91,4 +91,8 @@ def download_calling():
 if __name__ == '__main__':
     # 这里的“0.0.0.0”代表任何ip都可访问，并非写成服务器的ip地址
     # 端口是5000，服务器安全组配置5000端口要打开
-    app.run(host=conf.get_host(), port=conf.get_port())
+
+    # ssl_context = ('/root/ssl/cert.crt', '/root/ssl/cert.key')
+    ssl_context = 'adhoc'
+    
+    app.run(host=conf.get_host(), port=conf.get_port(), ssl_context=ssl_context)
