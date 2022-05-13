@@ -292,6 +292,11 @@ namespace peripheral
             std::string card_id;
             bool is_activated;
             int intensity;
+
+            on_software_reset(internal_fmq);
+            msg = internal_fmq.get_message();
+            assert(msg.first == _fmq_e_t::bc26_software_reset);
+
             for (int i = 0; i < max_retry; i++)
             {
                 bool once_success = false;
@@ -301,27 +306,25 @@ namespace peripheral
 
                     on_send_at(10, internal_fmq);
                     msg = internal_fmq.get_message();
-                    assert(msg.first == feedback_message_enum_t::bc26_send_at);
+                    assert(msg.first == _fmq_e_t::bc26_send_at);
                     if (!utils::msg_data<bool>(msg))
                         break;
 
                     on_send_ate(false, internal_fmq);
                     msg = internal_fmq.get_message();
-                    assert(msg.first == feedback_message_enum_t::bc26_send_ate);
+                    assert(msg.first == _fmq_e_t::bc26_send_ate);
                     if (!utils::msg_data<bool>(msg))
                         break;
 
                     on_send_at_cfun_set(1, internal_fmq);
                     msg = internal_fmq.get_message();
-                    assert(msg.first ==
-                           feedback_message_enum_t::bc26_send_at_cfun_set);
+                    assert(msg.first == _fmq_e_t::bc26_send_at_cfun_set);
                     if (!utils::msg_data<bool>(msg))
                         break;
 
                     on_send_at_cimi(internal_fmq);
                     msg = internal_fmq.get_message();
-                    assert(msg.first ==
-                           feedback_message_enum_t::bc26_send_at_cimi);
+                    assert(msg.first == _fmq_e_t::bc26_send_at_cimi);
                     {
                         const auto& data = *std::static_pointer_cast<
                             std::tuple<bool, std::string>>(msg.second);
@@ -333,8 +336,7 @@ namespace peripheral
 
                     on_send_at_cgatt_get(internal_fmq);
                     msg = internal_fmq.get_message();
-                    assert(msg.first ==
-                           feedback_message_enum_t::bc26_send_at_cgatt_get);
+                    assert(msg.first == _fmq_e_t::bc26_send_at_cgatt_get);
                     {
                         const auto& data =
                             *std::static_pointer_cast<std::tuple<bool, bool>>(
@@ -347,8 +349,7 @@ namespace peripheral
 
                     on_send_at_cesq(internal_fmq);
                     msg = internal_fmq.get_message();
-                    assert(msg.first ==
-                           feedback_message_enum_t::bc26_send_at_cesq);
+                    assert(msg.first == _fmq_e_t::bc26_send_at_cesq);
                     {
                         const auto& data =
                             *std::static_pointer_cast<std::tuple<bool, int>>(
