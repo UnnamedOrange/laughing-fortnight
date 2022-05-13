@@ -73,6 +73,10 @@ namespace peripheral
          */
         bc26_send_at,
         /**
+         * @brief BC26 模块 software_reset 的反馈信息。
+         */
+        bc26_software_reset,
+        /**
          * @brief BC26 模块 send_ate 的反馈消息。
          *
          * @param bool 是否成功收到 OK。

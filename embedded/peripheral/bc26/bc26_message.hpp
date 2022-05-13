@@ -22,6 +22,10 @@ namespace peripheral
          */
         send_at,
         /**
+         * @brief 发送 AT+QRST=1 指令。软件重置。
+         */
+        software_reset,
+        /**
          * @brief 发送 ATE<echo> 指令。打开或关闭回显。
          *
          * @param bool 是否打开回显。

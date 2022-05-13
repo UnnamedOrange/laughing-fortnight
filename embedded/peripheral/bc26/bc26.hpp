@@ -60,6 +60,11 @@ namespace peripheral
                 on_send_at(*std::static_pointer_cast<int>(data));
                 break;
             }
+            case bc26_message_t::software_reset:
+            {
+                on_software_reset();
+                break;
+            }
             case bc26_message_t::send_ate:
             {
                 on_send_ate(*std::static_pointer_cast<bool>(data));
@@ -131,6 +136,24 @@ namespace peripheral
         void on_send_at(int max_retry)
         {
             on_send_at(max_retry, _external_fmq);
+        }
+        /**
+         * @brief 发送 AT+QRST=1 指令。软件重置。
+         */
+        void on_software_reset(_fmq_t& fmq)
+        {
+            utils::debug_printf("[-] AT+QRST=1\n");
+            sender.send_command("AT+QRST=1\r\n");
+            std::string received_str = receiver.receive_command(300ms);
+            utils::debug_printf("%s", received_str.c_str());
+            utils::debug_printf("[D] AT+QRST=1\n");
+
+            // 参见 feedback_message_enum_t::bc26_software_reset。
+            fmq.post_message(_fmq_e_t::bc26_software_reset, nullptr);
+        }
+        void on_software_reset()
+        {
+            on_software_reset(_external_fmq);
         }
         /**
          * @brief 发送 ATE 指令，打开或关闭回显。
@@ -366,6 +389,14 @@ namespace peripheral
         {
             post_message(static_cast<int>(bc26_message_t::send_at),
                          std::make_shared<int>(max_retry));
+        }
+        /**
+         * @brief 向子模块发送消息。发送 AT+QRST=1 指令。软件重置。
+         */
+        void software_reset()
+        {
+            post_message(static_cast<int>(bc26_message_t::software_reset),
+                         nullptr);
         }
         /**
          * @brief 向子模块发送消息。发送 ATE<echo> 指令。打开或关闭回显。
