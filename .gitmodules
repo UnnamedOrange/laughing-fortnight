@@ -1,0 +1,6 @@
+[submodule "miniprogram"]
+	path = miniprogram
+	url = https://github.com/Honour-Van/automatic-goggles.git
+[submodule "cloudbase"]
+	path = cloudbase
+	url = https://github.com/Honour-Van/semiauto-goggles.git
