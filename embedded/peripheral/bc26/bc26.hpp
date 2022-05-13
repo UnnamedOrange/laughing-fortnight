@@ -167,9 +167,10 @@ namespace peripheral
             sender.send_command("ATE" + std::to_string(is_echo) + "\r\n");
             std::string received_str = receiver.receive_command(300ms);
             utils::debug_printf("%s", received_str.c_str());
-            utils::debug_printf("[D] ATE%d\n", static_cast<int>(is_echo));
 
             bool is_success = received_str.find("OK") != std::string::npos;
+            utils::debug_printf("[%c] ATE%d\n", is_success ? 'D' : 'F',
+                                static_cast<int>(is_echo));
             // 参见 feedback_message_enum_t::bc26_send_ate。
             fmq.post_message(_fmq_e_t::bc26_send_ate,
                              std::make_shared<bool>(is_success));
@@ -191,9 +192,10 @@ namespace peripheral
             sender.send_command("AT+CFUN=" + std::to_string(mode) + "\r\n");
             std::string received_str = receiver.receive_command(300ms);
             utils::debug_printf("%s", received_str.c_str());
-            utils::debug_printf("[D] AT+CFUN=%d\n", mode);
 
             bool is_success = received_str.find("OK") != std::string::npos;
+            utils::debug_printf("[%c] AT+CFUN=%d\n", is_success ? 'D' : 'F',
+                                mode);
             // 参见 feedback_message_enum_t::bc26_send_at_cfun_set。
             fmq.post_message(_fmq_e_t::bc26_send_at_cfun_set,
                              std::make_shared<bool>(is_success));
@@ -211,13 +213,13 @@ namespace peripheral
             sender.send_command("AT+CIMI\r\n");
             std::string received_str = receiver.receive_command(300ms);
             utils::debug_printf("%s", received_str.c_str());
-            utils::debug_printf("[D] AT+CIMI\n");
 
             bool is_success = received_str.find("OK") != std::string::npos;
             char id[32]{};
             // 解析失败时，id 应该为全 0。
             if (is_success && 1 != sscanf(received_str.c_str(), "%s", id))
                 is_success = false;
+            utils::debug_printf("[%c] AT+CIMI\n", is_success ? 'D' : 'F');
             // 参见 feedback_message_enum_t::bc26_send_at_cimi。
             fmq.post_message(_fmq_e_t::bc26_send_at_cimi,
                              std::make_shared<std::tuple<bool, std::string>>(
@@ -237,13 +239,13 @@ namespace peripheral
             sender.send_command("AT+CGATT?\r\n");
             std::string received_str = receiver.receive_command(300ms);
             utils::debug_printf("%s", received_str.c_str());
-            utils::debug_printf("[D] AT+CGATT?\n");
 
             bool is_success = received_str.find("OK") != std::string::npos;
             int is_activated{};
             if (is_success && 1 != sscanf(received_str.c_str(),
                                           "\r\n+CGATT: %d", &is_activated))
                 is_success = false;
+            utils::debug_printf("[%c] AT+CGATT?\n", is_success ? 'D' : 'F');
             // 参见 feedback_message_enum_t::bc26_send_at_cgatt_get。
             fmq.post_message(_fmq_e_t::bc26_send_at_cgatt_get,
                              std::make_shared<std::tuple<bool, bool>>(
@@ -262,13 +264,13 @@ namespace peripheral
             sender.send_command("AT+CESQ\r\n");
             std::string received_str = receiver.receive_command(300ms);
             utils::debug_printf("%s", received_str.c_str());
-            utils::debug_printf("[D] AT+CESQ\n");
 
             bool is_success = received_str.find("OK") != std::string::npos;
             int intensity{};
             if (is_success &&
                 1 != sscanf(received_str.c_str(), "\r\n+CESQ: %d", &intensity))
                 is_success = false;
+            utils::debug_printf("[%c] AT+CESQ\n", is_success ? 'D' : 'F');
             // 参见 feedback_message_enum_t::bc26_send_at_cesq。
             fmq.post_message(
                 _fmq_e_t::bc26_send_at_cesq,
