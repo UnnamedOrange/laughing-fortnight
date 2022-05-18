@@ -104,6 +104,14 @@ namespace peripheral
                 on_send_at_qmtcfg(std::get<0>(param), std::get<1>(param));
                 break;
             }
+            case bc26_message_t::send_at_qmtopen:
+            {
+                using param_type = std::tuple<int, std::string, int>;
+                const auto& param = *std::static_pointer_cast<param_type>(data);
+                on_send_at_qmtopen(std::get<0>(param), std::get<1>(param),
+                                   std::get<2>(param));
+                break;
+            }
             default:
             {
                 break;
@@ -426,6 +434,59 @@ namespace peripheral
         {
             on_send_at_qmtcfg(type, params, _external_fmq);
         }
+        /**
+         * @brief 发送 AT+QMTOPEN= 指令。打开 MQTT 客户端网络。
+         *
+         * @todo 测试该功能。
+         *
+         * @param tcp_connect_id MQTT Socket 标识符。范围 0-5。
+         * @param host_name 服务器地址，可以是 IP 地址或者域名。最大长度 100
+         * 字节。不包含引号。
+         * @param port 服务器端口。范围 1-65535。
+         */
+        void on_send_at_qmtopen(int tcp_connect_id,
+                                const std::string& host_name, int port,
+                                _fmq_t& fmq)
+        {
+            std::string cmd = "AT+QMTOPEN=";
+            assert(0 <= tcp_connect_id && tcp_connect_id <= 5);
+            cmd += std::to_string(tcp_connect_id);
+            cmd += ",\"" + host_name + "\",";
+            cmd += std::to_string(port);
+            cmd += "\r\n";
+
+            utils::debug_printf("[-] %s", cmd.c_str());
+            sender.send_command(cmd);
+            std::string received_str;
+            // 至多会等待 75s。
+            // TODO: 增加等待超时。目前假设总是会成功。
+            do
+            {
+                received_str = receiver.receive_command(300ms);
+            } while (received_str.empty());
+            // 额外再收一次，确保收完。
+            received_str += receiver.receive_command(300ms);
+            utils::debug_printf("%s", received_str.c_str());
+
+            bool is_success = received_str.find("OK") != std::string::npos;
+            int returned_tcp_connect_id{};
+            int result{};
+            if (is_success &&
+                2 != sscanf(received_str.c_str(), "OK\r\n\r\n+QMTOPEN: %d,%d",
+                            &returned_tcp_connect_id, &result))
+                is_success = false;
+            utils::debug_printf("[%c] %s", is_success ? 'D' : 'F', is_success,
+                                cmd.c_str());
+            // 参见 feedback_message_enum_t::bc26_send_at_qmtopen。
+            fmq.post_message(_fmq_e_t::bc26_send_at_qmtopen,
+                             std::make_shared<std::tuple<bool, int, int>>(
+                                 is_success, returned_tcp_connect_id, result));
+        }
+        void on_send_at_qmtopen(int tcp_connect_id,
+                                const std::string& host_name, int port)
+        {
+            on_send_at_qmtopen(tcp_connect_id, host_name, port, _external_fmq);
+        }
 
         // 以下函数是主模块的接口，均在主线程中运行。
     public:
@@ -516,6 +577,23 @@ namespace peripheral
                 std::tuple<std::string, std::vector<std::string>>;
             post_message(static_cast<int>(bc26_message_t::send_at_qmtcfg),
                          std::make_shared<param_type>(type, params));
+        }
+        /**
+         * @brief 向子模块发送消息。发送 AT+QMTOPEN= 指令。打开 MQTT
+         * 客户端网络。
+         *
+         * @param tcp_connect_id MQTT Socket 标识符。范围 0-5。
+         * @param host_name 服务器地址，可以是 IP 地址或者域名。最大长度 100
+         * 字节。不包含引号。
+         * @param port 服务器端口。范围 1-65535。
+         */
+        void send_at_qmtopen(int tcp_connect_id, const std::string& host_name,
+                             int port)
+        {
+            using param_type = std::tuple<int, std::string, int>;
+            post_message(
+                static_cast<int>(bc26_message_t::send_at_qmtopen),
+                std::make_shared<param_type>(tcp_connect_id, host_name, port));
         }
     };
 } // namespace peripheral

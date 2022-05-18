@@ -65,6 +65,15 @@ namespace peripheral
          * 参数列表。各参数将会被逗号隔开，需要手动添加引号。
          */
         send_at_qmtcfg,
+        /**
+         * @brief 发送 AT+QMTOPEN= 指令。打开 MQTT 客户端网络。
+         *
+         * @param int MQTT Socket 标识符。范围 0-5。
+         * @param std::string 服务器地址，可以是 IP 地址或者域名。最大长度 100
+         * 字节。不包含引号。
+         * @param int 服务器端口。范围 1-65535。
+         */
+        send_at_qmtopen,
 
         _message_end,
         /**
