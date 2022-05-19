@@ -74,6 +74,12 @@ namespace peripheral
          * @param int 服务器端口。范围 1-65535。
          */
         send_at_qmtopen,
+        /**
+         * @brief 发送 AT+QMTCLOSE= 指令。关闭 MQTT 客户端网络。
+         *
+         * @param int MQTT Socket 标识符。范围 0-5。
+         */
+        send_at_qmtclose,
 
         _message_end,
         /**
