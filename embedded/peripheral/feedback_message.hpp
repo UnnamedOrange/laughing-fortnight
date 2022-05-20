@@ -159,6 +159,16 @@ namespace peripheral
          */
         bc26_send_at_qmtconn,
         /**
+         * @brief BC26 模块 send_at_qmtdisc 的反馈消息。
+         *
+         * @param bool 是否成功收到 OK 且成功解析结果。
+         * @param int MQTT Socket 标识符。范围 0-5。
+         * @param int 命令执行结果。
+         * - -1 断开连接失败。
+         * - 0 断开连接成功。
+         */
+        bc26_send_at_qmtdisc,
+        /**
          * @brief BC26 模块消息的终止点。不包含初始化消息。
          */
         bc26_message_end,

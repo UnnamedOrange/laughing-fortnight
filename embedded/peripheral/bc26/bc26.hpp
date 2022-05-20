@@ -127,6 +127,12 @@ namespace peripheral
                                    std::get<2>(param), std::get<3>(param));
                 break;
             }
+            case bc26_message_t::send_at_qmtdisc:
+            {
+                auto tcp_connect_id = *std::static_pointer_cast<int>(data);
+                on_send_at_qmtdisc(tcp_connect_id);
+                break;
+            }
             default:
             {
                 break;
@@ -598,6 +604,43 @@ namespace peripheral
             on_send_at_qmtconn(tcp_connect_id, client_id, username, password,
                                _external_fmq);
         }
+        /**
+         * @brief 向子模块发送消息。发送 AT+QMTDISC= 指令。MQTT
+         * 服务器断开与客户端连接。
+         *
+         * @todo 测试该功能。
+         *
+         * @param tcp_connect_id MQTT Socket 标识符。范围 0-5。
+         */
+        void on_send_at_qmtdisc(int tcp_connect_id, _fmq_t& fmq)
+        {
+            assert(0 <= tcp_connect_id && tcp_connect_id <= 5);
+            std::string cmd =
+                "AT+QMTDISC=" + std::to_string(tcp_connect_id) + "\r\n";
+
+            utils::debug_printf("[-] %s", cmd.c_str());
+            sender.send_command(cmd);
+            std::string received_str = receiver.receive_command(300ms);
+            utils::debug_printf("%s", received_str.c_str());
+
+            bool is_success = received_str.find("OK") != std::string::npos;
+            int returned_tcp_connect_id{};
+            int result{};
+            if (is_success &&
+                2 != sscanf(received_str.c_str(), "OK\r\n\r\n+QMTDISC: %d,%d",
+                            &returned_tcp_connect_id, &result))
+                is_success = false;
+            utils::debug_printf("[%c] %s", is_success ? 'D' : 'F', is_success,
+                                cmd.c_str());
+            // 参见 feedback_message_enum_t::bc26_send_at_qmtdisc。
+            fmq.post_message(_fmq_e_t::bc26_send_at_qmtdisc,
+                             std::make_shared<std::tuple<bool, int, int>>(
+                                 is_success, returned_tcp_connect_id, result));
+        }
+        void on_send_at_qmtdisc(int tcp_connect_id)
+        {
+            on_send_at_qmtdisc(tcp_connect_id, _external_fmq);
+        }
 
         // 以下函数是主模块的接口，均在主线程中运行。
     public:
@@ -735,6 +778,17 @@ namespace peripheral
             post_message(static_cast<int>(bc26_message_t::send_at_qmtconn),
                          std::make_shared<param_type>(tcp_connect_id, client_id,
                                                       username, password));
+        }
+        /**
+         * @brief 向子模块发送消息。发送 AT+QMTDISC= 指令。MQTT
+         * 服务器断开与客户端连接。
+         *
+         * @param tcp_connect_id MQTT Socket 标识符。范围 0-5。
+         */
+        void send_at_qmtdisc(int tcp_connect_id)
+        {
+            post_message(static_cast<int>(bc26_message_t::send_at_qmtdisc),
+                         std::make_shared<int>(tcp_connect_id));
         }
     };
 } // namespace peripheral

@@ -89,6 +89,12 @@ namespace peripheral
          * @param std::string 客户端用户名对应的密码，可用来鉴权。不包含引号。
          */
         send_at_qmtconn,
+        /**
+         * @brief 发送 AT+QMTDISC= 指令。MQTT 服务器断开与客户端连接。
+         *
+         * @param int MQTT Socket 标识符。范围 0-5。
+         */
+        send_at_qmtdisc,
 
         _message_end,
         /**
