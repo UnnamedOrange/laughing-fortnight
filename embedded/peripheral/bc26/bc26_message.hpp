@@ -80,6 +80,15 @@ namespace peripheral
          * @param int MQTT Socket 标识符。范围 0-5。
          */
         send_at_qmtclose,
+        /**
+         * @brief 发送 AT+QMTCONN= 指令。客户端连接 MQTT 服务器。
+         *
+         * @param int MQTT Socket 标识符。范围 0-5。
+         * @param std::string 客户端标识符。不包含引号。
+         * @param std::string 客户端用户名，可用来鉴权。不包含引号。
+         * @param std::string 客户端用户名对应的密码，可用来鉴权。不包含引号。
+         */
+        send_at_qmtconn,
 
         _message_end,
         /**

@@ -118,6 +118,15 @@ namespace peripheral
                 on_send_at_qmtclose(tcp_connect_id);
                 break;
             }
+            case bc26_message_t::send_at_qmtconn:
+            {
+                using param_type =
+                    std::tuple<int, std::string, std::string, std::string>;
+                const auto& param = *std::static_pointer_cast<param_type>(data);
+                on_send_at_qmtconn(std::get<0>(param), std::get<1>(param),
+                                   std::get<2>(param), std::get<3>(param));
+                break;
+            }
             default:
             {
                 break;
@@ -529,6 +538,66 @@ namespace peripheral
         {
             on_send_at_qmtclose(tcp_connect_id, _external_fmq);
         }
+        /**
+         * @brief 发送 AT+QMTCONN= 指令。客户端连接 MQTT 服务器。
+         *
+         * @todo 测试该功能。
+         *
+         * @param tcp_connect_id MQTT Socket 标识符。范围 0-5。
+         * @param client_id 客户端标识符。不包含引号。
+         * @param username 客户端用户名，可用来鉴权。不包含引号。
+         * @param password 客户端用户名对应的密码，可用来鉴权。不包含引号。
+         */
+        void on_send_at_qmtconn(int tcp_connect_id,
+                                const std::string& client_id,
+                                const std::string& username,
+                                const std::string& password, _fmq_t& fmq)
+        {
+            std::string cmd = "AT+QMTCONN=";
+            assert(0 <= tcp_connect_id && tcp_connect_id <= 5);
+            cmd += std::to_string(tcp_connect_id);
+            cmd += ",\"" + client_id + "\"";
+            cmd += ",\"" + username + "\"";
+            cmd += ",\"" + password + "\"";
+            cmd += "\r\n";
+
+            utils::debug_printf("[-] %s", cmd.c_str());
+            sender.send_command(cmd);
+            std::string received_str;
+            // 默认至多会等待 10s。
+            // TODO: 增加等待超时。目前假设总是会成功。
+            do
+            {
+                received_str = receiver.receive_command(300ms);
+            } while (received_str.empty());
+            // 额外再收一次，确保收完。
+            received_str += receiver.receive_command(300ms);
+            utils::debug_printf("%s", received_str.c_str());
+
+            bool is_success = received_str.find("OK") != std::string::npos;
+            int returned_tcp_connect_id{};
+            int result{};
+            int ret_code{};
+            if (is_success &&
+                2 > sscanf(received_str.c_str(), "OK\r\n\r\n+QMTCONN: %d,%d,%d",
+                           &returned_tcp_connect_id, &result, &ret_code))
+                is_success = false;
+            utils::debug_printf("[%c] %s", is_success ? 'D' : 'F', is_success,
+                                cmd.c_str());
+            // 参见 feedback_message_enum_t::bc26_send_at_qmtconn。
+            fmq.post_message(
+                _fmq_e_t::bc26_send_at_qmtconn,
+                std::make_shared<std::tuple<bool, int, int, int>>(
+                    is_success, returned_tcp_connect_id, result, ret_code));
+        }
+        void on_send_at_qmtconn(int tcp_connect_id,
+                                const std::string& client_id,
+                                const std::string& username,
+                                const std::string& password)
+        {
+            on_send_at_qmtconn(tcp_connect_id, client_id, username, password,
+                               _external_fmq);
+        }
 
         // 以下函数是主模块的接口，均在主线程中运行。
     public:
@@ -647,6 +716,25 @@ namespace peripheral
         {
             post_message(static_cast<int>(bc26_message_t::send_at_qmtclose),
                          std::make_shared<int>(tcp_connect_id));
+        }
+        /**
+         * @brief 向子模块发送消息。发送 AT+QMTCONN= 指令。客户端连接 MQTT
+         * 服务器。
+         *
+         * @param tcp_connect_id MQTT Socket 标识符。范围 0-5。
+         * @param client_id 客户端标识符。不包含引号。
+         * @param username 客户端用户名，可用来鉴权。不包含引号。
+         * @param password 客户端用户名对应的密码，可用来鉴权。不包含引号。
+         */
+        void send_at_qmtconn(int tcp_connect_id, const std::string& client_id,
+                             const std::string& username,
+                             const std::string& password)
+        {
+            using param_type =
+                std::tuple<int, std::string, std::string, std::string>;
+            post_message(static_cast<int>(bc26_message_t::send_at_qmtconn),
+                         std::make_shared<param_type>(tcp_connect_id, client_id,
+                                                      username, password));
         }
     };
 } // namespace peripheral
