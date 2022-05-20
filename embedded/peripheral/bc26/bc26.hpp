@@ -133,6 +133,14 @@ namespace peripheral
                 on_send_at_qmtdisc(tcp_connect_id);
                 break;
             }
+            case bc26_message_t::send_at_qmtsub:
+            {
+                using param_type = std::tuple<int, int, std::string, int>;
+                const auto& param = *std::static_pointer_cast<param_type>(data);
+                on_send_at_qmtsub(std::get<0>(param), std::get<1>(param),
+                                  std::get<2>(param), std::get<3>(param));
+                break;
+            }
             default:
             {
                 break;
@@ -641,6 +649,67 @@ namespace peripheral
         {
             on_send_at_qmtdisc(tcp_connect_id, _external_fmq);
         }
+        /**
+         * @brief 发送 AT+QMTSUB= 指令。订阅主题。
+         *
+         * @param tcp_connect_id MQTT Socket 标识符。范围 0-5。
+         * @param msg_id 数据包标识符，范围：1-65535。
+         * @param topic 客户端想要订阅或者退订的主题，最大长度是 255 字节。
+         * @param qos 客户端想要发送消息的 QoS 等级。
+         * - 0 最多发送一次。
+         * - 1 至少发送一次。
+         * - 2 只发送一次。
+         */
+        void on_send_at_qmtsub(int tcp_connect_id, int msg_id,
+                               const std::string& topic, int qos, _fmq_t& fmq)
+        {
+            std::string cmd = "AT+QMTSUB=";
+            assert(0 <= tcp_connect_id && tcp_connect_id <= 5);
+            cmd += std::to_string(tcp_connect_id);
+            assert(0 <= msg_id && msg_id <= 65535);
+            cmd += "," + std::to_string(msg_id);
+            cmd += ",\"" + topic + "\"";
+            cmd += "," + std::to_string(qos);
+            cmd += "\r\n";
+
+            utils::debug_printf("[-] %s", cmd.c_str());
+            sender.send_command(cmd);
+            std::string received_str;
+            // 默认至多会等待 40s。
+            // TODO: 增加等待超时。目前假设总是会成功。
+            do
+            {
+                received_str = receiver.receive_command(300ms);
+            } while (received_str.empty());
+            // 额外再收一次，确保收完。
+            received_str += receiver.receive_command(300ms);
+            utils::debug_printf("%s", received_str.c_str());
+
+            bool is_success = received_str.find("OK") != std::string::npos;
+            int returned_tcp_connect_id{};
+            int returned_msg_id{};
+            int result{};
+            int value{};
+            if (is_success && 3 > sscanf(received_str.c_str(),
+                                         "OK\r\n\r\n+QMTSUB: %d,%d,%d,%d",
+                                         &returned_tcp_connect_id,
+                                         &returned_msg_id, &result, &value))
+                is_success = false;
+            utils::debug_printf("[%c] %s", is_success ? 'D' : 'F', is_success,
+                                cmd.c_str());
+            // 参见 feedback_message_enum_t::bc26_send_at_qmtsub。
+            fmq.post_message(
+                _fmq_e_t::bc26_send_at_qmtsub,
+                std::make_shared<std::tuple<bool, int, int, int, int>>(
+                    is_success, returned_tcp_connect_id, returned_msg_id,
+                    result, value));
+        }
+        void on_send_at_qmtsub(int tcp_connect_id, int msg_id,
+                               const std::string& topic, int qos)
+        {
+            on_send_at_qmtsub(tcp_connect_id, msg_id, topic, qos,
+                              _external_fmq);
+        }
 
         // 以下函数是主模块的接口，均在主线程中运行。
     public:
@@ -789,6 +858,25 @@ namespace peripheral
         {
             post_message(static_cast<int>(bc26_message_t::send_at_qmtdisc),
                          std::make_shared<int>(tcp_connect_id));
+        }
+        /**
+         * @brief 向子模块发送消息。发送 AT+QMTSUB= 指令。订阅主题。
+         *
+         * @param tcp_connect_id MQTT Socket 标识符。范围 0-5。
+         * @param msg_id 数据包标识符，范围：1-65535。
+         * @param topic 客户端想要订阅或者退订的主题，最大长度是 255 字节。
+         * @param qos 客户端想要发送消息的 QoS 等级。
+         * - 0 最多发送一次。
+         * - 1 至少发送一次。
+         * - 2 只发送一次。
+         */
+        void send_at_qmtsub(int tcp_connect_id, int msg_id,
+                            const std::string& topic, int qos)
+        {
+            using param_type = std::tuple<int, int, std::string, int>;
+            post_message(static_cast<int>(bc26_message_t::send_at_qmtsub),
+                         std::make_shared<param_type>(tcp_connect_id, msg_id,
+                                                      topic, qos));
         }
     };
 } // namespace peripheral

@@ -169,6 +169,23 @@ namespace peripheral
          */
         bc26_send_at_qmtdisc,
         /**
+         * @brief BC26 模块 send_at_qmtsub 的反馈信息。
+         *
+         * @param bool 是否成功收到 OK 且成功解析结果。
+         * @param int MQTT Socket 标识符。范围 0-5。
+         * @param int 数据包标识符，范围：1-65535。
+         * @param int 命令执行结果。
+         * - 0 数据包发送成功且接收到服务器的 ACK。
+         * - 1 数据包重传。
+         * - 2 数据包发送失败。
+         * @param int
+         * - 若命令执行结果为 0，则作为已确认 QoS 等级的矢量。同时，该参数值为
+         * 128，表示服务器拒绝订阅。
+         * - 若命令执行结果为 1，则表示数据包重传次数。
+         * - 若命令执行结果为 2，则不显示。
+         */
+        bc26_send_at_qmtsub,
+        /**
          * @brief BC26 模块消息的终止点。不包含初始化消息。
          */
         bc26_message_end,

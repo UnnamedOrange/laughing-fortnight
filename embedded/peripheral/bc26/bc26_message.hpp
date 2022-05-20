@@ -95,6 +95,19 @@ namespace peripheral
          * @param int MQTT Socket 标识符。范围 0-5。
          */
         send_at_qmtdisc,
+        /**
+         * @brief 发送 AT+QMTSUB= 指令。订阅主题。
+         *
+         * @param int MQTT Socket 标识符。范围 0-5。
+         * @param int 数据包标识符，范围：1-65535。
+         * @param std::string 客户端想要订阅或者退订的主题，最大长度是 255
+         * 字节。
+         * @param int 客户端想要发送消息的 QoS 等级。
+         * - 0 最多发送一次。
+         * - 1 至少发送一次。
+         * - 2 只发送一次。
+         */
+        send_at_qmtsub,
 
         _message_end,
         /**
