@@ -73,6 +73,13 @@ namespace peripheral
          * @param int Socket 服务索引。范围 0-4。默认为 0。
          */
         send_at_qiclose,
+        /**
+         * @brief 发送 AT+QISEND= 指令。发送文本字符串数据。
+         *
+         * @param std::string 要发送的文本字符串。
+         * @param int Socket 服务索引。范围 0-4。默认为 0。
+         */
+        send_at_qisend,
 
         /**
          * @brief 发送 AT+QMTCFG= 指令。配置 MQTT 可选参数。

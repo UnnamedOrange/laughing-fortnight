@@ -110,6 +110,13 @@ namespace peripheral
                 on_send_at_qiclose(connect_id);
                 break;
             }
+            case bc26_message_t::send_at_qisend:
+            {
+                using param_type = std::tuple<std::string, int>;
+                const auto& param = *std::static_pointer_cast<param_type>(data);
+                on_send_at_qisend(std::get<0>(param), std::get<1>(param));
+                break;
+            }
             case bc26_message_t::send_at_qmtcfg:
             {
                 using param_type =
@@ -536,6 +543,43 @@ namespace peripheral
         {
             on_send_at_qiclose(connect_id, _external_fmq);
         }
+        /**
+         * @brief 发送 AT+QISEND= 指令。发送文本字符串数据。
+         *
+         * @todo 测试该功能。
+         *
+         * @param str 要发送的文本字符串。
+         * @param connect_id Socket 服务索引。范围 0-4。默认为 0。
+         */
+        void on_send_at_qisend(const std::string& str, int connect_id,
+                               _fmq_t& fmq)
+        {
+            std::string cmd = "AT+QISEND=";
+            assert(0 <= connect_id && connect_id <= 4);
+            cmd += std::to_string(connect_id);
+            assert(str.length() <= 1024);
+            cmd += "," + std::to_string(str.length());
+            cmd += ",\"" + str + "\"";
+            cmd += "\r\n";
+
+            utils::debug_printf("[-] %s", cmd.c_str());
+            sender.send_command(cmd);
+            std::string received_str = receiver.receive_command(300ms);
+            utils::debug_printf("%s", received_str.c_str());
+
+            bool is_success = received_str.find("OK") != std::string::npos;
+            if (is_success)
+                is_success &= received_str.find("SEND OK") != std::string::npos;
+            utils::debug_printf("[%c] %s", is_success ? 'D' : 'F', is_success,
+                                cmd.c_str());
+            // 参见 feedback_message_enum_t::bc26_send_at_qisend。
+            fmq.post_message(_fmq_e_t::bc26_send_at_qisend,
+                             std::make_shared<bool>(is_success));
+        }
+        void on_send_at_qisend(const std::string& str, int connect_id)
+        {
+            on_send_at_qisend(str, connect_id, _external_fmq);
+        }
 
         /**
          * @brief 发送 AT+QMTCFG= 指令。配置 MQTT 可选参数。
@@ -921,6 +965,18 @@ namespace peripheral
         {
             post_message(static_cast<int>(bc26_message_t::send_at_qiclose),
                          std::make_shared<int>(connect_id));
+        }
+        /**
+         * @brief 向子模块发送消息。发送 AT+QISEND= 指令。发送文本字符串数据。
+         *
+         * @param str 要发送的文本字符串。
+         * @param connect_id Socket 服务索引。范围 0-4。默认为 0。
+         */
+        void send_at_qisend(const std::string& str, int connect_id = 0)
+        {
+            using param_type = std::tuple<std::string, int>;
+            post_message(static_cast<int>(bc26_message_t::send_at_qisend),
+                         std::make_shared<param_type>(str, connect_id));
         }
 
     private:
