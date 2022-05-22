@@ -24,9 +24,7 @@ inline constexpr PinName PIN_BC26_TX = PA_9;
 inline constexpr PinName PIN_BC26_RX = PA_10;
 
 /**
- * @brief GPS 的电源使能管脚。
- *
- * @todo 检查是高使能还是低使能。
+ * @brief GPS 的电源使能管脚。是低使能的。
  */
 inline constexpr PinName PIN_GPS_EN = PB_3;
 /**
@@ -75,9 +73,7 @@ inline constexpr PinName PIN_BUZZER_EN = PA_8;
 inline constexpr PinName PIN_BUZZER = PB_10;
 
 /**
- * @brief LED 灯的管脚。
- *
- * @todo 检查是高使能还是低使能。
+ * @brief LED 灯的管脚。是低使能的。
  */
 inline constexpr PinName PIN_LED = PB_5;
 
