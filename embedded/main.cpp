@@ -10,6 +10,7 @@
 // 取消注释以进行测试。
 // #define RUN_TEST 1
 // #define RUN_TEST_ACCEL 1
+// #define RUN_TEST_BC26 1
 // #define RUN_TEST_GPS 1
 
 // 取消注释以使用番茄闹钟进行调试。
@@ -311,6 +312,7 @@ public:
 // 定义宏以运行测试。
 #ifdef RUN_TEST
 #include <test/peripheral/accel/test_accel.hpp>
+#include <test/peripheral/bc26/test_bc26.hpp>
 #include <test/peripheral/gps/test_gps.hpp>
 #include <test/test_all.hpp>
 #endif
@@ -324,6 +326,10 @@ int main()
     // 定义宏以运行测试。该测试是阻塞的。
 #ifdef RUN_TEST_ACCEL
     utils::run_app<test::test_accel>();
+#endif
+    // 定义宏以运行测试。该测试是阻塞的。
+#ifdef RUN_TEST_BC26
+    utils::run_app<test::test_bc26>();
 #endif
     // 定义宏以运行测试。该测试是阻塞的。
 #ifdef RUN_TEST_GPS
