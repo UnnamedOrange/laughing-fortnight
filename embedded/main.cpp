@@ -21,6 +21,7 @@
 
 #include <peripheral/accel/accel.hpp>
 #include <peripheral/bc26/bc26.hpp>
+#include <peripheral/buzzer/buzzer.hpp>
 #include <peripheral/feedback_message.hpp>
 #include <peripheral/feedback_message_queue.hpp>
 #include <peripheral/gps/gps.hpp>
@@ -37,6 +38,7 @@ class Main
     std::unique_ptr<peripheral::gps> gps{
         std::make_unique<peripheral::gps>(fmq)};
     peripheral::accel accel{fmq};
+    peripheral::buzzer buzzer;
 
     using sys_clock = Kernel::Clock;
     using pos_t = peripheral::nmea_parser::position_t;
