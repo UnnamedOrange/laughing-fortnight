@@ -110,6 +110,14 @@ namespace peripheral
          */
         bc26_send_at_cesq,
         /**
+         * @brief BC26 模块 send_at_qiopen 的反馈消息。
+         *
+         * @param bool 是否成功收到 OK 且成功解析结果。
+         * @param int Socket 服务索引。范围 0-4。
+         * @param int 命令执行结果。
+         */
+        bc26_send_at_qiopen,
+        /**
          * @brief BC26 模块 send_at_qmtcfg 的反馈消息。
          *
          * @param bool 是否成功收到 OK。
