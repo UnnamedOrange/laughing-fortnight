@@ -130,6 +130,13 @@ namespace peripheral
          */
         bc26_send_at_qisend,
         /**
+         * @brief BC26 模块 send_at_qird 的反馈消息。
+         *
+         * @param bool 是否成功收到 OK。
+         * @param std::string 读出的缓冲区信息。
+         */
+        bc26_send_at_qird,
+        /**
          * @brief BC26 模块 send_at_qmtcfg 的反馈消息。
          *
          * @param bool 是否成功收到 OK。

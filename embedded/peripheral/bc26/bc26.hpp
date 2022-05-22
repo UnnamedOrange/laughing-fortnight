@@ -117,6 +117,12 @@ namespace peripheral
                 on_send_at_qisend(std::get<0>(param), std::get<1>(param));
                 break;
             }
+            case bc26_message_t::send_at_qird:
+            {
+                auto connect_id = *std::static_pointer_cast<int>(data);
+                on_send_at_qird(connect_id);
+                break;
+            }
             case bc26_message_t::send_at_qmtcfg:
             {
                 using param_type =
@@ -580,6 +586,75 @@ namespace peripheral
         {
             on_send_at_qisend(str, connect_id, _external_fmq);
         }
+        /**
+         * @brief 发送 AT+QIRD= 指令。读取收到的 TCP/IP 数据。
+         *
+         * @todo 测试该功能。
+         *
+         * @param connect_id Socket 服务索引。范围 0-4。默认为 0。
+         */
+        void on_send_at_qird(int connect_id, _fmq_t& fmq)
+        {
+            // 考虑到串口缓冲区的默认大小为 256。
+            constexpr int buffer_size = 128;
+
+            std::string cmd = "AT+QIRD=";
+            assert(0 <= connect_id && connect_id <= 4);
+            cmd += std::to_string(connect_id);
+            cmd += "," + std::to_string(buffer_size);
+            cmd += "\r\n";
+
+            utils::debug_printf("[-] %s", cmd.c_str());
+            sender.send_command(cmd);
+            std::string received_str = receiver.receive_command(300ms);
+            utils::debug_printf("%s", received_str.c_str());
+
+            bool is_success = received_str.find("OK") != std::string::npos;
+            std::string data_read;
+            // 提取 +QIRD: 后的那一行。
+            if (is_success)
+            {
+                std::string_view raw{received_str};
+                size_t line_start = 0;
+                bool is_data = false;
+                for (size_t i = 0; i < raw.size(); i++)
+                {
+                    if (raw[i] == '\r')
+                        continue;
+                    if (raw[i] == '\n')
+                    {
+                        if (is_data)
+                        {
+                            while (i && (raw[i] == '\r' || raw[i] == '\n'))
+                                i--;
+                            if (~i)
+                            {
+                                data_read = std::move(std::string(
+                                    raw.substr(line_start, i - line_start)));
+                            }
+                            break;
+                        }
+                        else if (raw.substr(line_start, i - line_start)
+                                     .substr(0, 6) == "+QIRD:")
+                        {
+                            is_data = true;
+                        }
+                        line_start = i + 1;
+                    }
+                }
+            }
+
+            utils::debug_printf("[%c] %s", is_success ? 'D' : 'F', is_success,
+                                cmd.c_str());
+            // 参见 feedback_message_enum_t::bc26_send_at_qird。
+            fmq.post_message(_fmq_e_t::bc26_send_at_qird,
+                             std::make_shared<std::tuple<bool, std::string>>(
+                                 is_success, data_read));
+        }
+        void on_send_at_qird(int connect_id)
+        {
+            on_send_at_qird(connect_id, _external_fmq);
+        }
 
         /**
          * @brief 发送 AT+QMTCFG= 指令。配置 MQTT 可选参数。
@@ -977,6 +1052,16 @@ namespace peripheral
             using param_type = std::tuple<std::string, int>;
             post_message(static_cast<int>(bc26_message_t::send_at_qisend),
                          std::make_shared<param_type>(str, connect_id));
+        }
+        /**
+         * @brief 向子模块发送消息。发送 AT+QIRD= 指令。读取收到的 TCP/IP 数据。
+         *
+         * @param connect_id Socket 服务索引。范围 0-4。默认为 0。
+         */
+        void send_at_qird(int connect_id = 0)
+        {
+            post_message(static_cast<int>(bc26_message_t::send_at_qird),
+                         std::make_shared<int>(connect_id));
         }
 
     private:

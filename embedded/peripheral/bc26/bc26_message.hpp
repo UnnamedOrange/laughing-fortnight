@@ -80,6 +80,12 @@ namespace peripheral
          * @param int Socket 服务索引。范围 0-4。默认为 0。
          */
         send_at_qisend,
+        /**
+         * @brief 发送 AT+QIRD= 指令。读取收到的 TCP/IP 数据。
+         *
+         * @param int Socket 服务索引。范围 0-4。默认为 0。
+         */
+        send_at_qird,
 
         /**
          * @brief 发送 AT+QMTCFG= 指令。配置 MQTT 可选参数。
