@@ -505,8 +505,7 @@ namespace peripheral
                 2 != sscanf(received_str.c_str(), "OK\r\n\r\n+QIOPEN: %d,%d",
                             &returned_connect_id, &result))
                 is_success = false;
-            utils::debug_printf("[%c] %s", is_success ? 'D' : 'F', is_success,
-                                cmd.c_str());
+            utils::debug_printf("[%c] %s", is_success ? 'D' : 'F', cmd.c_str());
             // 参见 feedback_message_enum_t::bc26_send_at_qiopen。
             fmq.post_message(_fmq_e_t::bc26_send_at_qiopen,
                              std::make_shared<std::tuple<bool, int, int>>(
@@ -539,8 +538,7 @@ namespace peripheral
 
             bool is_success =
                 received_str.find("CLOSE OK") != std::string::npos;
-            utils::debug_printf("[%c] %s", is_success ? 'D' : 'F', is_success,
-                                cmd.c_str());
+            utils::debug_printf("[%c] %s", is_success ? 'D' : 'F', cmd.c_str());
             // 参见 feedback_message_enum_t::bc26_send_at_qiclose。
             fmq.post_message(_fmq_e_t::bc26_send_at_qiclose,
                              std::make_shared<bool>(is_success));
@@ -576,8 +574,7 @@ namespace peripheral
             bool is_success = received_str.find("OK") != std::string::npos;
             if (is_success)
                 is_success &= received_str.find("SEND OK") != std::string::npos;
-            utils::debug_printf("[%c] %s", is_success ? 'D' : 'F', is_success,
-                                cmd.c_str());
+            utils::debug_printf("[%c] %s", is_success ? 'D' : 'F', cmd.c_str());
             // 参见 feedback_message_enum_t::bc26_send_at_qisend。
             fmq.post_message(_fmq_e_t::bc26_send_at_qisend,
                              std::make_shared<bool>(is_success));
@@ -644,8 +641,7 @@ namespace peripheral
                 }
             }
 
-            utils::debug_printf("[%c] %s", is_success ? 'D' : 'F', is_success,
-                                cmd.c_str());
+            utils::debug_printf("[%c] %s", is_success ? 'D' : 'F', cmd.c_str());
             // 参见 feedback_message_enum_t::bc26_send_at_qird。
             fmq.post_message(_fmq_e_t::bc26_send_at_qird,
                              std::make_shared<std::tuple<bool, std::string>>(
@@ -678,8 +674,7 @@ namespace peripheral
             utils::debug_printf("%s", received_str.c_str());
 
             bool is_success = received_str.find("OK") != std::string::npos;
-            utils::debug_printf("[%c] %s", is_success ? 'D' : 'F', is_success,
-                                cmd.c_str());
+            utils::debug_printf("[%c] %s", is_success ? 'D' : 'F', cmd.c_str());
             // 参见 feedback_message_enum_t::bc26_send_at_qmtcfg。
             fmq.post_message(_fmq_e_t::bc26_send_at_qmtcfg,
                              std::make_shared<bool>(is_success));
@@ -730,8 +725,7 @@ namespace peripheral
                 2 != sscanf(received_str.c_str(), "OK\r\n\r\n+QMTOPEN: %d,%d",
                             &returned_tcp_connect_id, &result))
                 is_success = false;
-            utils::debug_printf("[%c] %s", is_success ? 'D' : 'F', is_success,
-                                cmd.c_str());
+            utils::debug_printf("[%c] %s", is_success ? 'D' : 'F', cmd.c_str());
             // 参见 feedback_message_enum_t::bc26_send_at_qmtopen。
             fmq.post_message(_fmq_e_t::bc26_send_at_qmtopen,
                              std::make_shared<std::tuple<bool, int, int>>(
@@ -767,8 +761,7 @@ namespace peripheral
                 2 != sscanf(received_str.c_str(), "OK\r\n\r\n+QMTCLOSE: %d,%d",
                             &returned_tcp_connect_id, &result))
                 is_success = false;
-            utils::debug_printf("[%c] %s", is_success ? 'D' : 'F', is_success,
-                                cmd.c_str());
+            utils::debug_printf("[%c] %s", is_success ? 'D' : 'F', cmd.c_str());
             // 参见 feedback_message_enum_t::bc26_send_at_qmtclose。
             fmq.post_message(_fmq_e_t::bc26_send_at_qmtclose,
                              std::make_shared<std::tuple<bool, int, int>>(
@@ -822,8 +815,7 @@ namespace peripheral
                 2 > sscanf(received_str.c_str(), "OK\r\n\r\n+QMTCONN: %d,%d,%d",
                            &returned_tcp_connect_id, &result, &ret_code))
                 is_success = false;
-            utils::debug_printf("[%c] %s", is_success ? 'D' : 'F', is_success,
-                                cmd.c_str());
+            utils::debug_printf("[%c] %s", is_success ? 'D' : 'F', cmd.c_str());
             // 参见 feedback_message_enum_t::bc26_send_at_qmtconn。
             fmq.post_message(
                 _fmq_e_t::bc26_send_at_qmtconn,
@@ -864,8 +856,7 @@ namespace peripheral
                 2 != sscanf(received_str.c_str(), "OK\r\n\r\n+QMTDISC: %d,%d",
                             &returned_tcp_connect_id, &result))
                 is_success = false;
-            utils::debug_printf("[%c] %s", is_success ? 'D' : 'F', is_success,
-                                cmd.c_str());
+            utils::debug_printf("[%c] %s", is_success ? 'D' : 'F', cmd.c_str());
             // 参见 feedback_message_enum_t::bc26_send_at_qmtdisc。
             fmq.post_message(_fmq_e_t::bc26_send_at_qmtdisc,
                              std::make_shared<std::tuple<bool, int, int>>(
@@ -921,8 +912,7 @@ namespace peripheral
                                          &returned_tcp_connect_id,
                                          &returned_msg_id, &result, &value))
                 is_success = false;
-            utils::debug_printf("[%c] %s", is_success ? 'D' : 'F', is_success,
-                                cmd.c_str());
+            utils::debug_printf("[%c] %s", is_success ? 'D' : 'F', cmd.c_str());
             // 参见 feedback_message_enum_t::bc26_send_at_qmtsub。
             fmq.post_message(
                 _fmq_e_t::bc26_send_at_qmtsub,
