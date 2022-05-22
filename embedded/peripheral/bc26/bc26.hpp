@@ -787,6 +787,7 @@ namespace peripheral
                          std::make_shared<int>(max_retry));
         }
 
+    private:
         /**
          * @brief 向子模块发送消息。发送 AT+QMTCFG= 指令。配置 MQTT 可选参数。
          *
