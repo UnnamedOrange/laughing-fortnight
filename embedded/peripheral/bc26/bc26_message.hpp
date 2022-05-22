@@ -67,6 +67,12 @@ namespace peripheral
          * false 表示服务类型为 UDP。
          */
         send_at_qiopen,
+        /**
+         * @brief 发送 AT+QICLOSE= 指令。关闭 Socket 服务。
+         *
+         * @param int Socket 服务索引。范围 0-4。默认为 0。
+         */
+        send_at_qiclose,
 
         /**
          * @brief 发送 AT+QMTCFG= 指令。配置 MQTT 可选参数。
