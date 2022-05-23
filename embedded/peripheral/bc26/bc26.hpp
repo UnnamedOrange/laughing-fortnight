@@ -626,14 +626,20 @@ namespace peripheral
                                 i--;
                             if (~i)
                             {
-                                data_read = std::move(std::string(
-                                    raw.substr(line_start, i - line_start)));
+                                data_read = std::move(std::string(raw.substr(
+                                    line_start, i - line_start + 1)));
                             }
                             break;
                         }
-                        else if (raw.substr(line_start, i - line_start)
+                        else if (raw.substr(line_start, i - line_start + 1)
                                      .substr(0, 6) == "+QIRD:")
                         {
+                            if (raw.substr(line_start, i - line_start + 1)
+                                    .substr(6, 2) == " 0")
+                            {
+                                // 没有数据，退出。严格按文档解析。
+                                break;
+                            }
                             is_data = true;
                         }
                         line_start = i + 1;

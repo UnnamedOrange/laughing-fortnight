@@ -126,11 +126,15 @@ namespace peripheral
         /**
          * @brief BC26 模块 send_at_qisend 的反馈消息。
          *
+         * @note 没有收到 OK 可以认为连接已断开。
+         *
          * @param bool 是否成功收到 SEND OK。
          */
         bc26_send_at_qisend,
         /**
          * @brief BC26 模块 send_at_qird 的反馈消息。
+         *
+         * @note 没有收到 OK 可以认为连接已断开。
          *
          * @param bool 是否成功收到 OK。
          * @param std::string 读出的缓冲区信息。
