@@ -22,6 +22,7 @@
 
 #include <peripheral/accel/accel.hpp>
 #include <peripheral/bc26/bc26.hpp>
+#include <peripheral/bc26/bc26_config.hpp>
 #include <peripheral/buzzer/buzzer.hpp>
 #include <peripheral/feedback_message.hpp>
 #include <peripheral/feedback_message_queue.hpp>
@@ -44,6 +45,23 @@ class Main
     using sys_clock = Kernel::Clock;
     using pos_t = peripheral::nmea_parser::position_t;
 
+    /**
+     * @brief 生成要发送的字符串。
+     * 格式：纬度,经度
+     *
+     * @param pos 位置信息。
+     * @return std::string 可发送的字符串。
+     */
+    static std::string make_sent_string(const pos_t& pos)
+    {
+        if (!pos.is_valid)
+            return "";
+        std::string ret;
+        ret += pos.latitude + pos.latitude_semi;
+        ret += "," + pos.longitude + pos.longitude_semi;
+        return ret;
+    }
+
     // 定义状态。
 
     // 是否是低功耗模式。
@@ -52,6 +70,8 @@ class Main
     sys_clock::time_point count_down_start_time = sys_clock::now();
     // 进入低功耗模式的倒计时预设时间。
     static constexpr auto count_down_elapse = 3min;
+    // 是否已经连接服务器。
+    bool is_server_connected = false;
     // 上次发送的位置信息。
     pos_t last_pos{};
 
@@ -112,6 +132,49 @@ class Main
 
         // 请求获得定位信息。
         gps->request_notify();
+    }
+
+    /**
+     * @brief 异步请求连接服务器。
+     */
+    void connect_server()
+    {
+        bc26.send_at_qiclose();
+        bc26.send_at_qiopen(remote_address, remote_port);
+    }
+    /**
+     * @brief 检查是否需要发送数据。如果需要，就发送 last_pos。
+     */
+    void check_and_send_position()
+    {
+        auto content = make_sent_string(last_pos);
+        if (is_server_connected) // 如果服务器已连接则发送，否则不发送。
+        {
+            bc26.send_at_qisend(content);
+        }
+    }
+    /**
+     * @brief 根据远程发送的指令进行操作。
+     *
+     * @todo 设计完整指令。
+     *
+     * @param command 远程发送的指令。
+     */
+    void check_command(const std::string& command)
+    {
+        if (false) // 方便对齐下面的代码。
+        {
+        }
+        else if (command == "buzz") // 蜂鸣器响的指令。
+        {
+            // 让蜂鸣器响。
+            utils::debug_printf("[I] buzz.\n");
+            buzzer.buzz();
+        }
+        else
+        {
+            utils::debug_printf("[W] Unknown message\n");
+        }
     }
 
     /**
@@ -238,7 +301,33 @@ class Main
             on_gps_notify(pos);
             break;
         }
-        // TODO: 实现所有消息的处理。（尤其是 BC26）
+        case fmq_e_t::bc26_send_at_qiopen:
+        {
+            using param_type = std::tuple<bool, int, int>;
+            const auto& t = utils::msg_data<param_type>(msg);
+            on_bc26_send_at_qiopen(std::get<0>(t), std::get<1>(t),
+                                   std::get<2>(t));
+            break;
+        }
+        case fmq_e_t::bc26_send_at_qiclose:
+        {
+            auto is_ok = utils::msg_data<bool>(msg);
+            on_bc26_send_at_qiclose(is_ok);
+            break;
+        }
+        case fmq_e_t::bc26_send_at_qisend:
+        {
+            auto is_ok = utils::msg_data<bool>(msg);
+            on_bc26_send_at_qisend(is_ok);
+            break;
+        }
+        case fmq_e_t::bc26_send_at_qird:
+        {
+            using param_type = std::tuple<bool, std::string>;
+            const auto& t = utils::msg_data<param_type>(msg);
+            on_bc26_send_at_qird(std::get<0>(t), std::get<1>(t));
+            break;
+        }
         default:
             break;
         }
@@ -268,15 +357,63 @@ class Main
     {
         utils::debug_printf("[I] gps notify.\n");
 
-        // TODO: 发送位置。
-
         // 更新状态。
         last_pos = pos;
+
+        // 发送位置。
+        check_and_send_position();
 
         // 如果是非低功耗模式，则请求下一次 GPS 信息。
         if (!is_low_power_mode())
         {
             gps->request_notify();
+        }
+    }
+    void on_bc26_send_at_qiopen(bool is_ok, int connect_id, int result)
+    {
+        if (is_ok && !result) // 如果服务器连接成功。
+        {
+            is_server_connected = true; // 更新状态。
+            bc26.send_at_qird();        // 开始轮询。
+        }
+        else
+        {
+            is_server_connected = false; // 保证状态变量正确。
+            // 等待 5 s 后，尝试重新连接服务器。
+            rtos::ThisThread::sleep_for(5s);
+            connect_server();
+        }
+    }
+    void on_bc26_send_at_qiclose(bool is_ok)
+    {
+        is_server_connected = false; // 更新状态。
+        assert(is_ok && "QICLOSE= always succeeds.");
+    }
+    void on_bc26_send_at_qisend(bool is_ok)
+    {
+        // 如果失败，认为服务器已断开连接。
+        if (!is_ok)
+        {
+            is_server_connected = false;
+            connect_server(); // 异步请求重新连接服务器。
+        }
+    }
+    void on_bc26_send_at_qird(bool is_ok, const std::string& content)
+    {
+        // 如果失败，认为服务器已断开连接。
+        if (!is_ok)
+        {
+            is_server_connected = false;
+            connect_server(); // 异步请求重新连接服务器。
+            return;
+        }
+        // 否则，根据内容转移状态，并且等待 1 s 轮询。
+        if (content.length())
+            check_command(content);
+        if (is_server_connected)
+        {
+            rtos::ThisThread::sleep_for(1s);
+            bc26.send_at_qird();
         }
     }
 
@@ -299,6 +436,9 @@ public:
             utils::debug_printf("[E] Init fail.\n");
             return; // 异常情况，退出。
         }
+
+        // 连接服务器。
+        connect_server();
 
         // 获取位置并发送。
         // 请求等待 GPS 模块发送第一条定位信息。
