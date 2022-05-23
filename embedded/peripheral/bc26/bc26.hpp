@@ -489,10 +489,10 @@ namespace peripheral
             sender.send_command(cmd);
             std::string received_str;
             // 至多会等待 60s。
-            // TODO: 增加等待超时。目前假设总是会成功。
+            // TODO: 目前假设总是会成功，增加错误判断。
             do
             {
-                received_str = receiver.receive_command(300ms);
+                received_str += receiver.receive_command(300ms);
             } while (received_str.find("+QIOPEN:") == std::string::npos);
             // 额外再收一次，确保收完。
             received_str += receiver.receive_command(300ms);
@@ -502,7 +502,7 @@ namespace peripheral
             int returned_connect_id{};
             int result{};
             if (is_success &&
-                2 != sscanf(received_str.c_str(), "OK\r\n\r\n+QIOPEN: %d,%d",
+                2 != sscanf(received_str.c_str(), "\r\nOK\r\n+QIOPEN: %d,%d",
                             &returned_connect_id, &result))
                 is_success = false;
             utils::debug_printf("[%c] %s", is_success ? 'D' : 'F', cmd.c_str());
