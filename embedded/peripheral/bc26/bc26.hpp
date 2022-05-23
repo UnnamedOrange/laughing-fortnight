@@ -488,8 +488,7 @@ namespace peripheral
             utils::debug_printf("[-] %s", cmd.c_str());
             sender.send_command(cmd);
             std::string received_str;
-            // 至多会等待 60s。
-            // TODO: 目前假设总是会成功，增加错误判断。
+            // 至多会等待 60s。必须等待它自然超时。
             do
             {
                 received_str += receiver.receive_command(300ms);
