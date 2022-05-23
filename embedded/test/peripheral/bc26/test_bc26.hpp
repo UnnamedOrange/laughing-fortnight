@@ -70,6 +70,7 @@ namespace test
             }
 
             // 打开 TCP 连接。
+            if (init_success)
             {
                 utils::debug_printf("[-] tcp open.\n");
                 init_success = false;
