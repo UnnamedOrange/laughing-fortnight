@@ -492,6 +492,9 @@ namespace peripheral
             do
             {
                 received_str += receiver.receive_command(300ms);
+                utils::debug_printf("%s", received_str.c_str());
+                if (received_str.find("ERROR") != std::string::npos)
+                    break;
             } while (received_str.find("+QIOPEN:") == std::string::npos);
             // 额外再收一次，确保收完。
             received_str += receiver.receive_command(300ms);
@@ -1021,10 +1024,10 @@ namespace peripheral
                             int connect_id = 0, bool is_service_type_tcp = true)
         {
             using param_type = std::tuple<std::string, int, int, bool>;
-            post_message(static_cast<int>(bc26_message_t::send_at_qiopen),
-                         std::make_shared<param_type>(address, remote_port,
-                                                      connect_id,
-                                                      is_service_type_tcp));
+            post_message_unique(
+                static_cast<int>(bc26_message_t::send_at_qiopen),
+                std::make_shared<param_type>(address, remote_port, connect_id,
+                                             is_service_type_tcp));
         }
         /**
          * @brief 向子模块发送消息。发送 AT+QICLOSE= 指令。关闭 Socket 服务。
@@ -1033,8 +1036,9 @@ namespace peripheral
          */
         void send_at_qiclose(int connect_id = 0)
         {
-            post_message(static_cast<int>(bc26_message_t::send_at_qiclose),
-                         std::make_shared<int>(connect_id));
+            post_message_unique(
+                static_cast<int>(bc26_message_t::send_at_qiclose),
+                std::make_shared<int>(connect_id));
         }
         /**
          * @brief 向子模块发送消息。发送 AT+QISEND= 指令。发送文本字符串数据。
@@ -1045,8 +1049,9 @@ namespace peripheral
         void send_at_qisend(const std::string& str, int connect_id = 0)
         {
             using param_type = std::tuple<std::string, int>;
-            post_message(static_cast<int>(bc26_message_t::send_at_qisend),
-                         std::make_shared<param_type>(str, connect_id));
+            post_message_unique(
+                static_cast<int>(bc26_message_t::send_at_qisend),
+                std::make_shared<param_type>(str, connect_id));
         }
         /**
          * @brief 向子模块发送消息。发送 AT+QIRD= 指令。读取收到的 TCP/IP 数据。
@@ -1055,8 +1060,8 @@ namespace peripheral
          */
         void send_at_qird(int connect_id = 0)
         {
-            post_message(static_cast<int>(bc26_message_t::send_at_qird),
-                         std::make_shared<int>(connect_id));
+            post_message_unique(static_cast<int>(bc26_message_t::send_at_qird),
+                                std::make_shared<int>(connect_id));
         }
 
     private:
