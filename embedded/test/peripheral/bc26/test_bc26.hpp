@@ -124,8 +124,65 @@ namespace test
                     sleep();
             }
 
+            // 之后每隔 50 s 向上传一次，每隔 5 s 查询一次。
+            int round = 0;
+            int count = 0;
             while (true)
             {
+                // 查询。
+                {
+                    bc26.send_at_qird();
+                }
+
+                // 上传。
+                if (count == 0)
+                {
+                    bc26.send_at_qisend("Current round: " +
+                                        std::to_string(round));
+                }
+
+                // 处理消息。
+                while (true)
+                {
+                    msg = fmq.peek_message();
+                    if (!static_cast<bool>(msg.first))
+                        break;
+
+                    switch (msg.first)
+                    {
+                    case fmq_e_t::bc26_send_at_qird:
+                    {
+                        auto data =
+                            utils::msg_data<std::tuple<bool, std::string>>(msg);
+                        if (std::get<0>(data))
+                        {
+                            if (std::get<1>(data).length())
+                            {
+                                utils::debug_printf("[I] received.\n");
+                                utils::debug_printf("data: %s\n",
+                                                    std::get<1>(data).c_str());
+                            }
+                        }
+                        else
+                        {
+                            utils::debug_printf("[E] qird fail.\n");
+                        }
+                        break;
+                    }
+                    default:
+                    {
+                        break;
+                    }
+                    }
+                }
+
+                count = count + 1;
+                if (count >= 10)
+                {
+                    round++;
+                    count = 0;
+                }
+                rtos::ThisThread::sleep_for(5s);
             }
         }
     };
