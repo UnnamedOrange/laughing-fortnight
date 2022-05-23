@@ -69,9 +69,7 @@ namespace test
                 }
             }
 
-            // 打开 TCP 连接。
-            if (init_success)
-            {
+            auto open_tcp = [&]() {
                 utils::debug_printf("[-] tcp open.\n");
                 init_success = false;
                 do
@@ -105,7 +103,7 @@ namespace test
                                 error("Unknown message %d.",
                                       static_cast<int>(msg.first));
                             }
-                            rtos::ThisThread::sleep_for(500ms);
+                            rtos::ThisThread::sleep_for(5s);
                             utils::debug_printf("[W] retry\n");
                         }
                     }
@@ -115,7 +113,11 @@ namespace test
                               static_cast<int>(msg.first));
                     }
                 } while (!init_success);
-            }
+            };
+
+            // 打开 TCP 连接。
+            if (init_success)
+                open_tcp();
 
             // 如果初始化失败，则一直阻塞。
             if (!init_success)
@@ -141,7 +143,16 @@ namespace test
                                         std::to_string(round));
                 }
 
+                count = count + 1;
+                if (count >= 10)
+                {
+                    round++;
+                    count = 0;
+                }
+                rtos::ThisThread::sleep_for(5s);
+
                 // 处理消息。
+                bool should_open_tcp = false;
                 while (true)
                 {
                     msg = fmq.peek_message();
@@ -152,7 +163,7 @@ namespace test
                     {
                     case fmq_e_t::bc26_send_at_qird:
                     {
-                        auto data =
+                        const auto& data =
                             utils::msg_data<std::tuple<bool, std::string>>(msg);
                         if (std::get<0>(data))
                         {
@@ -166,7 +177,15 @@ namespace test
                         else
                         {
                             utils::debug_printf("[E] qird fail.\n");
+                            should_open_tcp = true;
                         }
+                        break;
+                    }
+                    case fmq_e_t::bc26_send_at_qisend:
+                    {
+                        const auto& is_ok = utils::msg_data<bool>(msg);
+                        if (!is_ok)
+                            should_open_tcp = true;
                         break;
                     }
                     default:
@@ -175,14 +194,8 @@ namespace test
                     }
                     }
                 }
-
-                count = count + 1;
-                if (count >= 10)
-                {
-                    round++;
-                    count = 0;
-                }
-                rtos::ThisThread::sleep_for(5s);
+                if (should_open_tcp)
+                    open_tcp();
             }
         }
     };
