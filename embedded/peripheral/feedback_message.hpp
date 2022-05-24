@@ -20,6 +20,11 @@ namespace peripheral
         _message_begin = null,
 
         /**
+         * @brief 退出。
+         */
+        quit,
+
+        /**
          * @brief 各模块初始化消息的起始点。
          */
         init_message_begin,

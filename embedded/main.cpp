@@ -145,7 +145,7 @@ class Main
         try_connect_times++;
         if (try_connect_times > 10)
         {
-            fmq.post_message(peripheral::feedback_message_enum_t::null,
+            fmq.post_message(peripheral::feedback_message_enum_t::quit,
                              nullptr);
         }
         else
@@ -288,7 +288,10 @@ class Main
                 msg = fmq.peek_message();
             }
             // 数据处理与控制。
-            transfer(msg);
+            if (std::get<0>(msg) == peripheral::feedback_message_enum_t::quit)
+                break;
+            else
+                transfer(msg);
         }
     }
     /**
