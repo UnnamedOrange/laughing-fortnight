@@ -135,13 +135,24 @@ class Main
         gps->request_notify();
     }
 
+    // 尝试连接服务器的次数。尝试次数太多直接重置整个系统。
+    int try_connect_times{};
     /**
      * @brief 异步请求连接服务器。
      */
     void connect_server()
     {
-        bc26.send_at_qiclose();
-        bc26.send_at_qiopen(remote_address, remote_port);
+        try_connect_times++;
+        if (try_connect_times > 10)
+        {
+            fmq.post_message(peripheral::feedback_message_enum_t::null,
+                             nullptr);
+        }
+        else
+        {
+            bc26.send_at_qiclose();
+            bc26.send_at_qiopen(remote_address, remote_port);
+        }
     }
     /**
      * @brief 检查是否需要发送数据。如果需要，就发送 last_pos。
@@ -393,7 +404,7 @@ class Main
     void on_bc26_send_at_qiclose(bool is_ok)
     {
         is_server_connected = false; // 更新状态。
-        assert(is_ok && "QICLOSE= always succeeds.");
+        // 如果失败，就尝试重连。在 qiopen 中处理。
     }
     void on_bc26_send_at_qisend(bool is_ok)
     {

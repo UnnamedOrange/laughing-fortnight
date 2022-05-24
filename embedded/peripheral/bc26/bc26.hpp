@@ -488,13 +488,21 @@ namespace peripheral
             utils::debug_printf("[-] %s", cmd.c_str());
             sender.send_command(cmd);
             std::string received_str;
-            // 至多会等待 60s。必须等待它自然超时。
+            // 至多会等待 60 s。
+            // 只等待 10 s。如果没退出，就自动重置模块。
+            int times = 0;
             do
             {
                 received_str += receiver.receive_command(300ms);
                 utils::debug_printf("%s", received_str.c_str());
                 if (received_str.find("ERROR") != std::string::npos)
                     break;
+                times++;
+                if (300ms * times > 10s)
+                {
+                    init();
+                    break;
+                }
             } while (received_str.find("+QIOPEN:") == std::string::npos);
             // 额外再收一次，确保收完。
             received_str += receiver.receive_command(300ms);
