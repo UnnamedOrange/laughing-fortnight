@@ -58,6 +58,36 @@ namespace peripheral
         init,
 
         /**
+         * @brief 发送 AT+QIOPEN= 指令。打开 Socket 服务。
+         *
+         * @param std::string 远程服务器的 IP 地址或域名地址。不包含引号。
+         * @param int 远程服务器的端口号。范围 1-65535。
+         * @param int Socket 服务索引。范围 0-4。默认为 0。
+         * @param bool Socket 服务类型是否为 TCP。
+         * false 表示服务类型为 UDP。
+         */
+        send_at_qiopen,
+        /**
+         * @brief 发送 AT+QICLOSE= 指令。关闭 Socket 服务。
+         *
+         * @param int Socket 服务索引。范围 0-4。默认为 0。
+         */
+        send_at_qiclose,
+        /**
+         * @brief 发送 AT+QISEND= 指令。发送文本字符串数据。
+         *
+         * @param std::string 要发送的文本字符串。
+         * @param int Socket 服务索引。范围 0-4。默认为 0。
+         */
+        send_at_qisend,
+        /**
+         * @brief 发送 AT+QIRD= 指令。读取收到的 TCP/IP 数据。
+         *
+         * @param int Socket 服务索引。范围 0-4。默认为 0。
+         */
+        send_at_qird,
+
+        /**
          * @brief 发送 AT+QMTCFG= 指令。配置 MQTT 可选参数。
          *
          * @param std::string 类型。不包含引号。例如 dataformat。

@@ -20,6 +20,11 @@ namespace peripheral
         _message_begin = null,
 
         /**
+         * @brief 退出。
+         */
+        quit,
+
+        /**
          * @brief 各模块初始化消息的起始点。
          */
         init_message_begin,
@@ -109,6 +114,37 @@ namespace peripheral
          * @param int 信号强度。
          */
         bc26_send_at_cesq,
+        /**
+         * @brief BC26 模块 send_at_qiopen 的反馈消息。
+         *
+         * @param bool 是否成功收到 OK 且成功解析结果。
+         * @param int Socket 服务索引。范围 0-4。
+         * @param int 命令执行结果。
+         */
+        bc26_send_at_qiopen,
+        /**
+         * @brief BC26 模块 send_at_qiclose 的反馈消息。
+         *
+         * @param bool 是否成功收到 CLOSE OK。
+         */
+        bc26_send_at_qiclose,
+        /**
+         * @brief BC26 模块 send_at_qisend 的反馈消息。
+         *
+         * @note 没有收到 OK 可以认为连接已断开。
+         *
+         * @param bool 是否成功收到 SEND OK。
+         */
+        bc26_send_at_qisend,
+        /**
+         * @brief BC26 模块 send_at_qird 的反馈消息。
+         *
+         * @note 没有收到 OK 可以认为连接已断开。
+         *
+         * @param bool 是否成功收到 OK。
+         * @param std::string 读出的缓冲区信息。
+         */
+        bc26_send_at_qird,
         /**
          * @brief BC26 模块 send_at_qmtcfg 的反馈消息。
          *

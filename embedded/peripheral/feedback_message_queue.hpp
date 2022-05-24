@@ -116,5 +116,8 @@ namespace peripheral
             return raw_to_msg(message_queue::peek_message(
                 static_cast<int>(min_message), static_cast<int>(max_message)));
         }
+
+    public:
+        using message_queue::empty;
     };
 } // namespace peripheral

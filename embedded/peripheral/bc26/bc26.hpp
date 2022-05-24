@@ -96,6 +96,33 @@ namespace peripheral
                 on_init(*std::static_pointer_cast<int>(data));
                 break;
             }
+            case bc26_message_t::send_at_qiopen:
+            {
+                using param_type = std::tuple<std::string, int, int, bool>;
+                const auto& param = *std::static_pointer_cast<param_type>(data);
+                on_send_at_qiopen(std::get<0>(param), std::get<1>(param),
+                                  std::get<2>(param), std::get<3>(param));
+                break;
+            }
+            case bc26_message_t::send_at_qiclose:
+            {
+                auto connect_id = *std::static_pointer_cast<int>(data);
+                on_send_at_qiclose(connect_id);
+                break;
+            }
+            case bc26_message_t::send_at_qisend:
+            {
+                using param_type = std::tuple<std::string, int>;
+                const auto& param = *std::static_pointer_cast<param_type>(data);
+                on_send_at_qisend(std::get<0>(param), std::get<1>(param));
+                break;
+            }
+            case bc26_message_t::send_at_qird:
+            {
+                auto connect_id = *std::static_pointer_cast<int>(data);
+                on_send_at_qird(connect_id);
+                break;
+            }
             case bc26_message_t::send_at_qmtcfg:
             {
                 using param_type =
@@ -431,6 +458,217 @@ namespace peripheral
         }
 
         /**
+         * @brief 发送 AT+QIOPEN= 指令。打开 Socket 服务。
+         *
+         * @todo 测试该功能。
+         *
+         * @param address 远程服务器的 IP 地址或域名地址。不包含引号。
+         * @param remote_port 远程服务器的端口号。范围 1-65535。
+         * @param connect_id Socket 服务索引。范围 0-4。默认为 0。
+         * @param is_service_type_tcp Socket 服务类型是否为 TCP。
+         * false 表示服务类型为 UDP。
+         */
+        void on_send_at_qiopen(const std::string& address, int remote_port,
+                               int connect_id, bool is_service_type_tcp,
+                               _fmq_t& fmq)
+        {
+            std::string cmd = "AT+QIOPEN=";
+            cmd += "1"; // 场景 ID，目前只能为 1。
+            assert(0 <= connect_id && connect_id <= 4);
+            cmd += "," + std::to_string(connect_id);
+            if (is_service_type_tcp)
+                cmd += ",\"TCP\"";
+            else
+                cmd += ",\"UDP\"";
+            cmd += ",\"" + address + "\"";
+            assert(1 <= remote_port && remote_port <= 65535);
+            cmd += "," + std::to_string(remote_port);
+            cmd += "\r\n";
+
+            utils::debug_printf("[-] %s", cmd.c_str());
+            sender.send_command(cmd);
+            std::string received_str;
+            // 至多会等待 60 s。
+            // 只等待 10 s。如果没退出，就自动重置模块。
+            int times = 0;
+            do
+            {
+                received_str += receiver.receive_command(300ms);
+                utils::debug_printf("%s", received_str.c_str());
+                if (received_str.find("ERROR") != std::string::npos)
+                    break;
+                times++;
+                if (300ms * times > 10s)
+                {
+                    init();
+                    break;
+                }
+            } while (received_str.find("+QIOPEN:") == std::string::npos);
+            // 额外再收一次，确保收完。
+            received_str += receiver.receive_command(300ms);
+            utils::debug_printf("%s", received_str.c_str());
+
+            bool is_success = received_str.find("OK") != std::string::npos;
+            int returned_connect_id{};
+            int result{};
+            if (is_success &&
+                2 != sscanf(received_str.c_str(), "\r\nOK\r\n+QIOPEN: %d,%d",
+                            &returned_connect_id, &result))
+                is_success = false;
+            utils::debug_printf("[%c] %s", is_success ? 'D' : 'F', cmd.c_str());
+            // 参见 feedback_message_enum_t::bc26_send_at_qiopen。
+            fmq.post_message(_fmq_e_t::bc26_send_at_qiopen,
+                             std::make_shared<std::tuple<bool, int, int>>(
+                                 is_success, returned_connect_id, result));
+        }
+        void on_send_at_qiopen(const std::string& address, int remote_port,
+                               int connect_id, bool is_service_type_tcp)
+        {
+            on_send_at_qiopen(address, remote_port, connect_id,
+                              is_service_type_tcp, _external_fmq);
+        }
+        /**
+         * @brief 发送 AT+QICLOSE= 指令。关闭 Socket 服务。
+         *
+         * @todo 测试该功能。
+         *
+         * @param connect_id Socket 服务索引。范围 0-4。默认为 0。
+         */
+        void on_send_at_qiclose(int connect_id, _fmq_t& fmq)
+        {
+            std::string cmd = "AT+QICLOSE=";
+            assert(0 <= connect_id && connect_id <= 4);
+            cmd += std::to_string(connect_id);
+            cmd += "\r\n";
+
+            utils::debug_printf("[-] %s", cmd.c_str());
+            sender.send_command(cmd);
+            std::string received_str = receiver.receive_command(300ms);
+            utils::debug_printf("%s", received_str.c_str());
+
+            bool is_success =
+                received_str.find("CLOSE OK") != std::string::npos;
+            utils::debug_printf("[%c] %s", is_success ? 'D' : 'F', cmd.c_str());
+            // 参见 feedback_message_enum_t::bc26_send_at_qiclose。
+            fmq.post_message(_fmq_e_t::bc26_send_at_qiclose,
+                             std::make_shared<bool>(is_success));
+        }
+        void on_send_at_qiclose(int connect_id)
+        {
+            on_send_at_qiclose(connect_id, _external_fmq);
+        }
+        /**
+         * @brief 发送 AT+QISEND= 指令。发送文本字符串数据。
+         *
+         * @todo 测试该功能。
+         *
+         * @param str 要发送的文本字符串。
+         * @param connect_id Socket 服务索引。范围 0-4。默认为 0。
+         */
+        void on_send_at_qisend(const std::string& str, int connect_id,
+                               _fmq_t& fmq)
+        {
+            std::string cmd = "AT+QISEND=";
+            assert(0 <= connect_id && connect_id <= 4);
+            cmd += std::to_string(connect_id);
+            assert(str.length() <= 1024);
+            cmd += "," + std::to_string(str.length());
+            cmd += ",\"" + str + "\"";
+            cmd += "\r\n";
+
+            utils::debug_printf("[-] %s", cmd.c_str());
+            sender.send_command(cmd);
+            std::string received_str = receiver.receive_command(300ms);
+            utils::debug_printf("%s", received_str.c_str());
+
+            bool is_success = received_str.find("OK") != std::string::npos;
+            if (is_success)
+                is_success &= received_str.find("SEND OK") != std::string::npos;
+            utils::debug_printf("[%c] %s", is_success ? 'D' : 'F', cmd.c_str());
+            // 参见 feedback_message_enum_t::bc26_send_at_qisend。
+            fmq.post_message(_fmq_e_t::bc26_send_at_qisend,
+                             std::make_shared<bool>(is_success));
+        }
+        void on_send_at_qisend(const std::string& str, int connect_id)
+        {
+            on_send_at_qisend(str, connect_id, _external_fmq);
+        }
+        /**
+         * @brief 发送 AT+QIRD= 指令。读取收到的 TCP/IP 数据。
+         *
+         * @todo 测试该功能。
+         *
+         * @param connect_id Socket 服务索引。范围 0-4。默认为 0。
+         */
+        void on_send_at_qird(int connect_id, _fmq_t& fmq)
+        {
+            // 考虑到串口缓冲区的默认大小为 256。
+            constexpr int buffer_size = 128;
+
+            std::string cmd = "AT+QIRD=";
+            assert(0 <= connect_id && connect_id <= 4);
+            cmd += std::to_string(connect_id);
+            cmd += "," + std::to_string(buffer_size);
+            cmd += "\r\n";
+
+            utils::debug_printf("[-] %s", cmd.c_str());
+            sender.send_command(cmd);
+            std::string received_str = receiver.receive_command(300ms);
+            utils::debug_printf("%s", received_str.c_str());
+
+            bool is_success = received_str.find("OK") != std::string::npos;
+            std::string data_read;
+            // 提取 +QIRD: 后的那一行。
+            if (is_success)
+            {
+                std::string_view raw{received_str};
+                size_t line_start = 0;
+                bool is_data = false;
+                for (size_t i = 0; i < raw.size(); i++)
+                {
+                    if (raw[i] == '\r')
+                        continue;
+                    if (raw[i] == '\n')
+                    {
+                        if (is_data)
+                        {
+                            while (i && (raw[i] == '\r' || raw[i] == '\n'))
+                                i--;
+                            if (~i)
+                            {
+                                data_read = std::move(std::string(raw.substr(
+                                    line_start, i - line_start + 1)));
+                            }
+                            break;
+                        }
+                        else if (raw.substr(line_start, i - line_start + 1)
+                                     .substr(0, 6) == "+QIRD:")
+                        {
+                            if (raw.substr(line_start, i - line_start + 1)
+                                    .substr(6, 2) == " 0")
+                            {
+                                // 没有数据，退出。严格按文档解析。
+                                break;
+                            }
+                            is_data = true;
+                        }
+                        line_start = i + 1;
+                    }
+                }
+            }
+
+            utils::debug_printf("[%c] %s", is_success ? 'D' : 'F', cmd.c_str());
+            // 参见 feedback_message_enum_t::bc26_send_at_qird。
+            fmq.post_message(_fmq_e_t::bc26_send_at_qird,
+                             std::make_shared<std::tuple<bool, std::string>>(
+                                 is_success, data_read));
+        }
+        void on_send_at_qird(int connect_id)
+        {
+            on_send_at_qird(connect_id, _external_fmq);
+        }
+
+        /**
          * @brief 发送 AT+QMTCFG= 指令。配置 MQTT 可选参数。
          *
          * @param type 类型。不包含引号。例如 dataformat。
@@ -452,8 +690,7 @@ namespace peripheral
             utils::debug_printf("%s", received_str.c_str());
 
             bool is_success = received_str.find("OK") != std::string::npos;
-            utils::debug_printf("[%c] %s", is_success ? 'D' : 'F', is_success,
-                                cmd.c_str());
+            utils::debug_printf("[%c] %s", is_success ? 'D' : 'F', cmd.c_str());
             // 参见 feedback_message_enum_t::bc26_send_at_qmtcfg。
             fmq.post_message(_fmq_e_t::bc26_send_at_qmtcfg,
                              std::make_shared<bool>(is_success));
@@ -504,8 +741,7 @@ namespace peripheral
                 2 != sscanf(received_str.c_str(), "OK\r\n\r\n+QMTOPEN: %d,%d",
                             &returned_tcp_connect_id, &result))
                 is_success = false;
-            utils::debug_printf("[%c] %s", is_success ? 'D' : 'F', is_success,
-                                cmd.c_str());
+            utils::debug_printf("[%c] %s", is_success ? 'D' : 'F', cmd.c_str());
             // 参见 feedback_message_enum_t::bc26_send_at_qmtopen。
             fmq.post_message(_fmq_e_t::bc26_send_at_qmtopen,
                              std::make_shared<std::tuple<bool, int, int>>(
@@ -541,8 +777,7 @@ namespace peripheral
                 2 != sscanf(received_str.c_str(), "OK\r\n\r\n+QMTCLOSE: %d,%d",
                             &returned_tcp_connect_id, &result))
                 is_success = false;
-            utils::debug_printf("[%c] %s", is_success ? 'D' : 'F', is_success,
-                                cmd.c_str());
+            utils::debug_printf("[%c] %s", is_success ? 'D' : 'F', cmd.c_str());
             // 参见 feedback_message_enum_t::bc26_send_at_qmtclose。
             fmq.post_message(_fmq_e_t::bc26_send_at_qmtclose,
                              std::make_shared<std::tuple<bool, int, int>>(
@@ -596,8 +831,7 @@ namespace peripheral
                 2 > sscanf(received_str.c_str(), "OK\r\n\r\n+QMTCONN: %d,%d,%d",
                            &returned_tcp_connect_id, &result, &ret_code))
                 is_success = false;
-            utils::debug_printf("[%c] %s", is_success ? 'D' : 'F', is_success,
-                                cmd.c_str());
+            utils::debug_printf("[%c] %s", is_success ? 'D' : 'F', cmd.c_str());
             // 参见 feedback_message_enum_t::bc26_send_at_qmtconn。
             fmq.post_message(
                 _fmq_e_t::bc26_send_at_qmtconn,
@@ -638,8 +872,7 @@ namespace peripheral
                 2 != sscanf(received_str.c_str(), "OK\r\n\r\n+QMTDISC: %d,%d",
                             &returned_tcp_connect_id, &result))
                 is_success = false;
-            utils::debug_printf("[%c] %s", is_success ? 'D' : 'F', is_success,
-                                cmd.c_str());
+            utils::debug_printf("[%c] %s", is_success ? 'D' : 'F', cmd.c_str());
             // 参见 feedback_message_enum_t::bc26_send_at_qmtdisc。
             fmq.post_message(_fmq_e_t::bc26_send_at_qmtdisc,
                              std::make_shared<std::tuple<bool, int, int>>(
@@ -695,8 +928,7 @@ namespace peripheral
                                          &returned_tcp_connect_id,
                                          &returned_msg_id, &result, &value))
                 is_success = false;
-            utils::debug_printf("[%c] %s", is_success ? 'D' : 'F', is_success,
-                                cmd.c_str());
+            utils::debug_printf("[%c] %s", is_success ? 'D' : 'F', cmd.c_str());
             // 参见 feedback_message_enum_t::bc26_send_at_qmtsub。
             fmq.post_message(
                 _fmq_e_t::bc26_send_at_qmtsub,
@@ -787,6 +1019,60 @@ namespace peripheral
                          std::make_shared<int>(max_retry));
         }
 
+        /**
+         * @brief 向子模块发送消息。发送 AT+QIOPEN= 指令。打开 Socket 服务。
+         *
+         * @param address 远程服务器的 IP 地址或域名地址。不包含引号。
+         * @param remote_port 远程服务器的端口号。范围 1-65535。
+         * @param connect_id Socket 服务索引。范围 0-4。默认为 0。
+         * @param is_service_type_tcp Socket 服务类型是否为 TCP。
+         * false 表示服务类型为 UDP。
+         */
+        void send_at_qiopen(const std::string& address, int remote_port,
+                            int connect_id = 0, bool is_service_type_tcp = true)
+        {
+            using param_type = std::tuple<std::string, int, int, bool>;
+            post_message_unique(
+                static_cast<int>(bc26_message_t::send_at_qiopen),
+                std::make_shared<param_type>(address, remote_port, connect_id,
+                                             is_service_type_tcp));
+        }
+        /**
+         * @brief 向子模块发送消息。发送 AT+QICLOSE= 指令。关闭 Socket 服务。
+         *
+         * @param connect_id Socket 服务索引。范围 0-4。默认为 0。
+         */
+        void send_at_qiclose(int connect_id = 0)
+        {
+            post_message_unique(
+                static_cast<int>(bc26_message_t::send_at_qiclose),
+                std::make_shared<int>(connect_id));
+        }
+        /**
+         * @brief 向子模块发送消息。发送 AT+QISEND= 指令。发送文本字符串数据。
+         *
+         * @param str 要发送的文本字符串。
+         * @param connect_id Socket 服务索引。范围 0-4。默认为 0。
+         */
+        void send_at_qisend(const std::string& str, int connect_id = 0)
+        {
+            using param_type = std::tuple<std::string, int>;
+            post_message_unique(
+                static_cast<int>(bc26_message_t::send_at_qisend),
+                std::make_shared<param_type>(str, connect_id));
+        }
+        /**
+         * @brief 向子模块发送消息。发送 AT+QIRD= 指令。读取收到的 TCP/IP 数据。
+         *
+         * @param connect_id Socket 服务索引。范围 0-4。默认为 0。
+         */
+        void send_at_qird(int connect_id = 0)
+        {
+            post_message_unique(static_cast<int>(bc26_message_t::send_at_qird),
+                                std::make_shared<int>(connect_id));
+        }
+
+    private:
         /**
          * @brief 向子模块发送消息。发送 AT+QMTCFG= 指令。配置 MQTT 可选参数。
          *
