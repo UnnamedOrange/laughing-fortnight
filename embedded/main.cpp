@@ -75,6 +75,10 @@ class Main
     bool is_server_connected = false;
     // 上次发送的位置信息。
     pos_t last_pos{};
+    // 上次收到心跳的时刻。
+    sys_clock::time_point last_pulse_time = sys_clock::now();
+    // 心跳维持的预设时间。
+    static constexpr auto pulse_time_elapse = 2min;
 
     /**
      * @brief 系统是否处于低功耗模式。
@@ -186,7 +190,8 @@ class Main
         else if (command == "pulse") // 心跳。
         {
             utils::debug_printf("[I] pulse.\n");
-            // TODO: 考虑收到服务器心跳后做其他事情。
+            // 更新心跳时间。
+            last_pulse_time = sys_clock::now();
         }
         else
         {
@@ -430,8 +435,15 @@ class Main
         // 否则，根据内容转移状态，并且等待 1 s 轮询。
         if (content.length())
             check_command(content);
-        if (is_server_connected)
+        // 如果没有收到心跳，则认为已断开连接。
+        if (sys_clock::now() - last_pulse_time > pulse_time_elapse)
         {
+            is_server_connected = false;
+            connect_server(); // 异步请求重新连接服务器。
+        }
+        else if (is_server_connected)
+        {
+            // 等待 1 s 轮询。
             rtos::ThisThread::sleep_for(1s);
             bc26.send_at_qird();
         }
