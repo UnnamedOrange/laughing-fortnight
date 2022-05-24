@@ -46,8 +46,8 @@ class Main
     using pos_t = peripheral::nmea_parser::position_t;
 
     /**
-     * @brief 生成要发送的字符串。
-     * 格式：纬度,经度
+     * @brief 生成要发送的位置信息字符串。
+     * 格式：pos: 纬度,经度;
      *
      * @param pos 位置信息。
      * @return std::string 可发送的字符串。
@@ -56,9 +56,10 @@ class Main
     {
         if (!pos.is_valid)
             return "";
-        std::string ret;
+        std::string ret = "pos: ";
         ret += pos.latitude + pos.latitude_semi;
         ret += "," + pos.longitude + pos.longitude_semi;
+        ret += ";";
         return ret;
     }
 
@@ -167,9 +168,14 @@ class Main
         }
         else if (command == "buzz") // 蜂鸣器响的指令。
         {
-            // 让蜂鸣器响。
             utils::debug_printf("[I] buzz.\n");
+            // 让蜂鸣器响。
             buzzer.buzz();
+        }
+        else if (command == "pulse") // 心跳。
+        {
+            utils::debug_printf("[I] pulse.\n");
+            // TODO: 考虑收到服务器心跳后做其他事情。
         }
         else
         {
