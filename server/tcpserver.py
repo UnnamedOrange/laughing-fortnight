@@ -2,7 +2,7 @@ import socket
 from socket import error as SocketError
 import errno
 import threading
-from time import sleep
+from datetime import datetime, timedelta
 import requests
 
 
@@ -32,6 +32,7 @@ def nmea2deg(nmea):
     return deg2dec(deg, min, sec)
 
 buzz_state = 0
+last_pulse_time = datetime.now() - timedelta(minutes=2)
 
 while True:
     try:
@@ -45,13 +46,22 @@ while True:
         while True:
             # 通过客户socket获取客户端信息(bytes类型)，并解码为字符串类型
             try:
+                # 用于判别异常类型的flag
                 istimeout = False
 
+                # 维护心跳的计时
+                if datetime.now() - last_pulse_time > timedelta(minutes=1):
+                    last_pulse_time = datetime.now()
+                    tcpCliSock.send('pulse'.encode('utf8'))
+
+                # get云容器上保存的buzz信息
                 if requests.get(CLOUDBASE + 'buzz').json().get('data') == 1 and buzz_state == 0:
                     tcpCliSock.send('buzz'.encode('utf8'))
                     buzz_state = 1
+                    print('1', end='')
                 else:
                     buzz_state = 0
+                    print('0', end='')
 
                 data = tcpCliSock.recv(BUFSIZ).decode('utf8') # recv是阻塞的，所以发get请求应该放在前面
                 if data:
@@ -60,7 +70,7 @@ while True:
                     latitude = nmea2deg(latitude)
                     x = requests.post(CLOUDBASE + 'position',
                         json={"longitude": longitude, "latitude": latitude}) #注意这里是json=，否则会报500
-                    print('debug:', x)
+                    print('debug:', x.content.json)
 
             except socket.timeout:
                 data = ''
