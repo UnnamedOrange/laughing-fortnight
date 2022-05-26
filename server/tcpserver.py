@@ -31,6 +31,7 @@ def nmea2deg(nmea):
     sec = float(sec[:2] + '.' + sec[2:])
     return deg2dec(deg, min, sec)
 
+buzz_state = 0
 
 while True:
     try:
@@ -46,7 +47,13 @@ while True:
             try:
                 istimeout = False
 
-                data = tcpCliSock.recv(BUFSIZ).decode('utf8')
+                if requests.get(CLOUDBASE + 'buzz').json().get('data') == 1 and buzz_state == 0:
+                    tcpCliSock.send('buzz'.encode('utf8'))
+                    buzz_state = 1
+                else:
+                    buzz_state = 0
+
+                data = tcpCliSock.recv(BUFSIZ).decode('utf8') # recv是阻塞的，所以发get请求应该放在前面
                 if data:
                     latitude, longitude = data[data.rfind('pos:')+4:-1].split(',')
                     longitude = nmea2deg(longitude)
@@ -68,7 +75,7 @@ while True:
             finally:
                 if istimeout == False and not data:
                     break  # 非超时的情况且没有收到数据，说明服务端主动终止或客户端已经退出
-                print('recv once:', data, 'data length:', len(data))
+                # print('recv once:', data, 'data length:', len(data))
 
     except SocketError as e:
         if e.errno != errno.ECONNRESET:
