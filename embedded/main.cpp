@@ -57,8 +57,8 @@ class Main
         if (!pos.is_valid)
             return "";
         std::string ret = "pos: ";
-        ret += pos.latitude + pos.latitude_semi;
-        ret += "," + pos.longitude + pos.longitude_semi;
+        ret += pos.latitude;
+        ret += "," + pos.longitude;
         ret += ";";
         return ret;
     }
