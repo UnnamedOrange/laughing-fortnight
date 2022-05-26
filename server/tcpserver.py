@@ -24,12 +24,11 @@ def deg2dec(deg, min, sec):
     return deg + min/60 + sec/3600
 
 
-def nmea2deg(nmea):
-    deg_min, sec = nmea.split('.')
-    deg = int(deg_min[:-2])
-    min = int(deg_min[-2:])
-    sec = float(sec[:2] + '.' + sec[2:])
-    return deg2dec(deg, min, sec)
+def degmin2deg(degmin):
+    deg_sep = degmin.find('.') - 2
+    deg = int(degmin[:deg_sep])
+    min = float(degmin[deg_sep:])
+    return deg2dec(deg, min, 0)
 
 buzz_state = 0
 last_pulse_time = datetime.now() - timedelta(minutes=2)
@@ -66,8 +65,8 @@ while True:
                 data = tcpCliSock.recv(BUFSIZ).decode('utf8') # recv是阻塞的，所以发get请求应该放在前面
                 if data:
                     latitude, longitude = data[data.rfind('pos:')+4:-1].split(',')
-                    longitude = nmea2deg(longitude)
-                    latitude = nmea2deg(latitude)
+                    longitude = degmin2deg(longitude)
+                    latitude = degmin2deg(latitude)
                     x = requests.post(CLOUDBASE + 'position',
                         json={"longitude": longitude, "latitude": latitude}) #注意这里是json=，否则会报500
                     print('debug:', x.content.json)
