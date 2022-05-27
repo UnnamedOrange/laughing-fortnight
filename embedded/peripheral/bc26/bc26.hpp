@@ -460,8 +460,6 @@ namespace peripheral
         /**
          * @brief 发送 AT+QIOPEN= 指令。打开 Socket 服务。
          *
-         * @todo 测试该功能。
-         *
          * @param address 远程服务器的 IP 地址或域名地址。不包含引号。
          * @param remote_port 远程服务器的端口号。范围 1-65535。
          * @param connect_id Socket 服务索引。范围 0-4。默认为 0。
@@ -530,8 +528,6 @@ namespace peripheral
         /**
          * @brief 发送 AT+QICLOSE= 指令。关闭 Socket 服务。
          *
-         * @todo 测试该功能。
-         *
          * @param connect_id Socket 服务索引。范围 0-4。默认为 0。
          */
         void on_send_at_qiclose(int connect_id, _fmq_t& fmq)
@@ -559,8 +555,6 @@ namespace peripheral
         }
         /**
          * @brief 发送 AT+QISEND= 指令。发送文本字符串数据。
-         *
-         * @todo 测试该功能。
          *
          * @param str 要发送的文本字符串。
          * @param connect_id Socket 服务索引。范围 0-4。默认为 0。
@@ -595,8 +589,6 @@ namespace peripheral
         }
         /**
          * @brief 发送 AT+QIRD= 指令。读取收到的 TCP/IP 数据。
-         *
-         * @todo 测试该功能。
          *
          * @param connect_id Socket 服务索引。范围 0-4。默认为 0。
          */
