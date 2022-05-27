@@ -432,6 +432,12 @@ namespace peripheral
                         if (!std::get<0>(data))
                             break;
                         intensity = std::get<1>(data);
+                        // 如果还没有信号，先额外等待 5 s，再重新初始化。
+                        if (intensity == 0 || intensity == 99)
+                        {
+                            rtos::ThisThread::sleep_for(5s);
+                            break;
+                        }
                     }
 
                     once_success = true;
