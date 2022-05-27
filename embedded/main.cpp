@@ -176,8 +176,6 @@ class Main
     /**
      * @brief 根据远程发送的指令进行操作。
      *
-     * @todo 设计完整指令。
-     *
      * @param command 远程发送的指令。
      */
     void check_command(const std::string& command)
