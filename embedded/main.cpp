@@ -26,6 +26,7 @@
 #include <peripheral/buzzer/buzzer.hpp>
 #include <peripheral/feedback_message.hpp>
 #include <peripheral/feedback_message_queue.hpp>
+#include <peripheral/global_peripheral.hpp>
 #include <peripheral/gps/gps.hpp>
 #include <utils/app.hpp>
 #include <utils/debug.hpp>
@@ -37,6 +38,7 @@ class Main
 {
     peripheral::feedback_message_queue fmq;
     peripheral::bc26 bc26{fmq};
+    mbed::DigitalOut gps_en{PIN_GPS_EN};
     std::unique_ptr<peripheral::gps> gps{
         std::make_unique<peripheral::gps>(fmq)};
     peripheral::accel accel{fmq};
@@ -115,7 +117,8 @@ class Main
 
         low_power_mode = true;
         gps.reset();
-        // TODO: 关闭 GPS。
+        // 关闭 GPS。
+        gps_en = 1;
     }
     /**
      * @brief 退出低功耗模式。如果已经退出，只更新状态。
@@ -133,7 +136,8 @@ class Main
 
         low_power_mode = false;
         renew_count_down();
-        // TODO: 打开 GPS。
+        // 打开 GPS。
+        gps_en = 0;
 
         // 请求获得定位信息。
         gps->request_notify();

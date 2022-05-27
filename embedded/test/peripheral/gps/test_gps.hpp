@@ -16,6 +16,7 @@
 
 #include <peripheral/feedback_message.hpp>
 #include <peripheral/feedback_message_queue.hpp>
+#include <peripheral/global_peripheral.hpp>
 #include <peripheral/gps/gps.hpp>
 #include <peripheral/gps/nmea_parser.hpp>
 #include <utils/app.hpp>
@@ -33,6 +34,7 @@ namespace test
     {
         peripheral::feedback_message_queue fmq;
         peripheral::gps gps{fmq};
+        mbed::DigitalOut gps_en{PIN_GPS_EN};
 
     public:
         test_gps()
@@ -44,6 +46,7 @@ namespace test
             // 初始化 GPS 模块。
             {
                 utils::debug_printf("[-] Init gps.\n");
+                gps_en = 0;
                 gps.init();
             }
 
