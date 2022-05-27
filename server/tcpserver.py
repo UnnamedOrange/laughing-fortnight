@@ -4,6 +4,7 @@ import errno
 import threading
 from datetime import datetime, timedelta
 import requests
+from util.coord_trans import wgs84_to_gcj02
 
 
 HOST = '172.24.132.39'               # 允许任意host接入
@@ -67,9 +68,11 @@ while True:
                     latitude, longitude = data[data.rfind('pos:')+4:-1].split(',')
                     longitude = degmin2deg(longitude)
                     latitude = degmin2deg(latitude)
+                    longitude, latitude = wgs84_to_gcj02(longitude, latitude)
                     x = requests.post(CLOUDBASE + 'position',
                         json={"longitude": longitude, "latitude": latitude}) #注意这里是json=，否则会报500
-                    print('debug:', x.content.json)
+                    print('debug:', longitude, latitude)
+                    print(datetime.now())
 
             except socket.timeout:
                 data = ''
@@ -79,8 +82,6 @@ while True:
                 # TODO 测试这个异常处理
                 tcpCliSock.close()
                 raise KeyboardInterrupt
-            except Exception as e:
-                print(e)
             finally:
                 if istimeout == False and not data:
                     break  # 非超时的情况且没有收到数据，说明服务端主动终止或客户端已经退出
