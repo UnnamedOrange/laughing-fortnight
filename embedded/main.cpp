@@ -158,6 +158,7 @@ class Main
         }
         else
         {
+            last_pulse_time = sys_clock::now(); // 更新心跳时间。
             bc26.send_at_qiclose();
             bc26.send_at_qiopen(remote_address, remote_port);
         }
