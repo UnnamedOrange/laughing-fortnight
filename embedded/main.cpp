@@ -440,6 +440,7 @@ class Main
         // 如果没有收到心跳，则认为已断开连接。
         if (sys_clock::now() - last_pulse_time > pulse_time_elapse)
         {
+            utils::debug_printf("[W] pulse reset\n");
             is_server_connected = false;
             connect_server(); // 异步请求重新连接服务器。
         }
