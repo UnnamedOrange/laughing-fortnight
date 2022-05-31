@@ -498,7 +498,6 @@ namespace peripheral
             do
             {
                 received_str += receiver.receive_command(300ms);
-                utils::debug_printf("%s", received_str.c_str());
                 if (received_str.find("ERROR") != std::string::npos)
                     break;
                 times++;
@@ -515,10 +514,40 @@ namespace peripheral
             bool is_success = received_str.find("OK") != std::string::npos;
             int returned_connect_id{};
             int result{};
-            if (is_success &&
-                2 != sscanf(received_str.c_str(), "\r\nOK\r\n+QIOPEN: %d,%d",
-                            &returned_connect_id, &result))
-                is_success = false;
+            if (is_success)
+            {
+                bool found = false;
+                // 逐行解析字符串。
+                auto handle_line = [&](const std::string& line) -> bool {
+                    return 2 == sscanf(line.c_str(), "+QIOPEN: %d,%d",
+                                       &returned_connect_id, &result);
+                };
+                received_str.push_back('\n');
+                std::string buf;
+                for (char ch : received_str)
+                {
+                    buf.push_back(ch);
+                    if (buf.back() == '\n')
+                    {
+                        // 弹出所有的换行。
+                        while (!buf.empty() && buf.back() == '\n')
+                            buf.pop_back();
+                        while (!buf.empty() && buf.back() == '\r')
+                            buf.pop_back();
+                        // 如果不是空行，则处理。
+                        if (!buf.empty() && handle_line(buf))
+                        {
+                            found = true;
+                            break;
+                        }
+                        // 处理完成，清空缓冲区。
+                        buf.clear();
+                    }
+                }
+                // 如果没找到，说明解析失败。
+                if (!found)
+                    is_success = false;
+            }
             utils::debug_printf("[%c] %s", is_success ? 'D' : 'F', cmd.c_str());
             // 参见 feedback_message_enum_t::bc26_send_at_qiopen。
             fmq.post_message(_fmq_e_t::bc26_send_at_qiopen,
