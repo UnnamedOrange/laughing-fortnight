@@ -43,6 +43,7 @@ class Main
         std::make_unique<peripheral::gps>(fmq)};
     peripheral::accel accel{fmq};
     peripheral::buzzer buzzer;
+    mbed::DigitalOut debug_led{PIN_LED};
 
     using sys_clock = Kernel::Clock;
     using pos_t = peripheral::nmea_parser::position_t;
@@ -456,6 +457,11 @@ class Main
 public:
     Main()
     {
+        // 让 LED 亮 50 ms，说明系统正常开机。
+        debug_led = 0;
+        rtos::ThisThread::sleep_for(50ms);
+        debug_led = 1;
+
         // 异步初始化各模块。
         {
             utils::debug_printf("[-] Init accel.\n");
