@@ -22,13 +22,12 @@ namespace peripheral
     class buzzer : public peripheral_std_framework
     {
     private:
-        // TODO: 确定是高使能还是低使能。
-        constexpr static int EN_ON = 1; // 使用 !EN_ON 表示不使能。
+        // 低使能。
+        constexpr static int EN_ON = 0; // 使用 !EN_ON 表示不使能。
         constexpr static int period_us = 1'000'000 / 440; // 440 Hz。
 
     protected:
         mbed::DigitalOut _buzzer_en{PIN_BUZZER_EN};
-        mbed::PwmOut _buzzer_out{PIN_BUZZER};
 
     private:
         bool is_buzzing{};
@@ -37,7 +36,6 @@ namespace peripheral
         buzzer()
         {
             _buzzer_en = !EN_ON;
-            _buzzer_out.period_us(period_us);
         }
         ~buzzer()
         {
@@ -73,10 +71,8 @@ namespace peripheral
             {
                 using namespace std::literals;
                 _buzzer_en = EN_ON;
-                _buzzer_out.write(0.5f);
                 rtos::ThisThread::sleep_for(1s);
             } while (false);
-            _buzzer_out.write(0.0f);
             _buzzer_en = !EN_ON;
             is_buzzing = false;
         }

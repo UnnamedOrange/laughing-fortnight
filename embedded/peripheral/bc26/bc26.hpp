@@ -432,6 +432,12 @@ namespace peripheral
                         if (!std::get<0>(data))
                             break;
                         intensity = std::get<1>(data);
+                        // 如果还没有信号，先额外等待 5 s，再重新初始化。
+                        if (intensity == 0 || intensity == 99)
+                        {
+                            rtos::ThisThread::sleep_for(5s);
+                            break;
+                        }
                     }
 
                     once_success = true;
@@ -459,8 +465,6 @@ namespace peripheral
 
         /**
          * @brief 发送 AT+QIOPEN= 指令。打开 Socket 服务。
-         *
-         * @todo 测试该功能。
          *
          * @param address 远程服务器的 IP 地址或域名地址。不包含引号。
          * @param remote_port 远程服务器的端口号。范围 1-65535。
@@ -494,7 +498,6 @@ namespace peripheral
             do
             {
                 received_str += receiver.receive_command(300ms);
-                utils::debug_printf("%s", received_str.c_str());
                 if (received_str.find("ERROR") != std::string::npos)
                     break;
                 times++;
@@ -511,10 +514,40 @@ namespace peripheral
             bool is_success = received_str.find("OK") != std::string::npos;
             int returned_connect_id{};
             int result{};
-            if (is_success &&
-                2 != sscanf(received_str.c_str(), "\r\nOK\r\n+QIOPEN: %d,%d",
-                            &returned_connect_id, &result))
-                is_success = false;
+            if (is_success)
+            {
+                bool found = false;
+                // 逐行解析字符串。
+                auto handle_line = [&](const std::string& line) -> bool {
+                    return 2 == sscanf(line.c_str(), "+QIOPEN: %d,%d",
+                                       &returned_connect_id, &result);
+                };
+                received_str.push_back('\n');
+                std::string buf;
+                for (char ch : received_str)
+                {
+                    buf.push_back(ch);
+                    if (buf.back() == '\n')
+                    {
+                        // 弹出所有的换行。
+                        while (!buf.empty() && buf.back() == '\n')
+                            buf.pop_back();
+                        while (!buf.empty() && buf.back() == '\r')
+                            buf.pop_back();
+                        // 如果不是空行，则处理。
+                        if (!buf.empty() && handle_line(buf))
+                        {
+                            found = true;
+                            break;
+                        }
+                        // 处理完成，清空缓冲区。
+                        buf.clear();
+                    }
+                }
+                // 如果没找到，说明解析失败。
+                if (!found)
+                    is_success = false;
+            }
             utils::debug_printf("[%c] %s", is_success ? 'D' : 'F', cmd.c_str());
             // 参见 feedback_message_enum_t::bc26_send_at_qiopen。
             fmq.post_message(_fmq_e_t::bc26_send_at_qiopen,
@@ -529,8 +562,6 @@ namespace peripheral
         }
         /**
          * @brief 发送 AT+QICLOSE= 指令。关闭 Socket 服务。
-         *
-         * @todo 测试该功能。
          *
          * @param connect_id Socket 服务索引。范围 0-4。默认为 0。
          */
@@ -559,8 +590,6 @@ namespace peripheral
         }
         /**
          * @brief 发送 AT+QISEND= 指令。发送文本字符串数据。
-         *
-         * @todo 测试该功能。
          *
          * @param str 要发送的文本字符串。
          * @param connect_id Socket 服务索引。范围 0-4。默认为 0。
@@ -595,8 +624,6 @@ namespace peripheral
         }
         /**
          * @brief 发送 AT+QIRD= 指令。读取收到的 TCP/IP 数据。
-         *
-         * @todo 测试该功能。
          *
          * @param connect_id Socket 服务索引。范围 0-4。默认为 0。
          */

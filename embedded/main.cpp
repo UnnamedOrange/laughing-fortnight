@@ -26,6 +26,7 @@
 #include <peripheral/buzzer/buzzer.hpp>
 #include <peripheral/feedback_message.hpp>
 #include <peripheral/feedback_message_queue.hpp>
+#include <peripheral/global_peripheral.hpp>
 #include <peripheral/gps/gps.hpp>
 #include <utils/app.hpp>
 #include <utils/debug.hpp>
@@ -37,10 +38,12 @@ class Main
 {
     peripheral::feedback_message_queue fmq;
     peripheral::bc26 bc26{fmq};
+    mbed::DigitalOut gps_en{PIN_GPS_EN};
     std::unique_ptr<peripheral::gps> gps{
         std::make_unique<peripheral::gps>(fmq)};
     peripheral::accel accel{fmq};
     peripheral::buzzer buzzer;
+    mbed::DigitalOut debug_led{PIN_LED};
 
     using sys_clock = Kernel::Clock;
     using pos_t = peripheral::nmea_parser::position_t;
@@ -57,8 +60,8 @@ class Main
         if (!pos.is_valid)
             return "";
         std::string ret = "pos: ";
-        ret += pos.latitude + pos.latitude_semi;
-        ret += "," + pos.longitude + pos.longitude_semi;
+        ret += pos.latitude;
+        ret += "," + pos.longitude;
         ret += ";";
         return ret;
     }
@@ -115,7 +118,8 @@ class Main
 
         low_power_mode = true;
         gps.reset();
-        // TODO: 关闭 GPS。
+        // 关闭 GPS。
+        gps_en = 1;
     }
     /**
      * @brief 退出低功耗模式。如果已经退出，只更新状态。
@@ -133,7 +137,8 @@ class Main
 
         low_power_mode = false;
         renew_count_down();
-        // TODO: 打开 GPS。
+        // 打开 GPS。
+        gps_en = 0;
 
         // 请求获得定位信息。
         gps->request_notify();
@@ -154,6 +159,7 @@ class Main
         }
         else
         {
+            last_pulse_time = sys_clock::now(); // 更新心跳时间。
             bc26.send_at_qiclose();
             bc26.send_at_qiopen(remote_address, remote_port);
         }
@@ -171,8 +177,6 @@ class Main
     }
     /**
      * @brief 根据远程发送的指令进行操作。
-     *
-     * @todo 设计完整指令。
      *
      * @param command 远程发送的指令。
      */
@@ -438,6 +442,7 @@ class Main
         // 如果没有收到心跳，则认为已断开连接。
         if (sys_clock::now() - last_pulse_time > pulse_time_elapse)
         {
+            utils::debug_printf("[W] pulse reset\n");
             is_server_connected = false;
             connect_server(); // 异步请求重新连接服务器。
         }
@@ -452,6 +457,11 @@ class Main
 public:
     Main()
     {
+        // 让 LED 亮 50 ms，说明系统正常开机。
+        debug_led = 0;
+        rtos::ThisThread::sleep_for(50ms);
+        debug_led = 1;
+
         // 异步初始化各模块。
         {
             utils::debug_printf("[-] Init accel.\n");

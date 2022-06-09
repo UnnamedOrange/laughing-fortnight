@@ -62,15 +62,9 @@ inline constexpr PinName PIN_ACCEL_INT1 = PC_10;
 inline constexpr PinName PIN_ACCEL_INT2 = PC_12;
 
 /**
- * @brief 蜂鸣器的电源使能管脚。是 5 V 稳压模块的使能。
- *
- * @todo 检查是高使能还是低使能。
+ * @brief 蜂鸣器的电源使能管脚。是低使能的。
  */
-inline constexpr PinName PIN_BUZZER_EN = PA_8;
-/**
- * @brief 蜂鸣器的输出管脚。
- */
-inline constexpr PinName PIN_BUZZER = PB_10;
+inline constexpr PinName PIN_BUZZER_EN = PB_10;
 
 /**
  * @brief LED 灯的管脚。是低使能的。
